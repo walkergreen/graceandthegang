@@ -5,6 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Grace and the Gang — Sketch Comedy out of Washington, DC</title>
 <meta name="description" content="Grace and the Gang is an award-winning sketch comedy group from the creative mind of Grace Fennell. Live in DC, and everywhere you scroll.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/favicon.svg">
+<meta name="theme-color" content="#8A90DC">
+<meta property="og:title" content="Grace and the Gang">
+<meta property="og:description" content="Sketch comedy out of Washington, DC. An award-winning group from the creative mind of Grace Fennell.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.graceandthegang.com/">
+<meta property="og:image" content="https://www.graceandthegang.com/assets/logo.webp">
+<meta name="twitter:card" content="summary_large_image">
 <style>
 /* ══════════════════════════════════════════════
    GRACE AND THE GANG
@@ -933,32 +942,32 @@ a.client:hover span { color: var(--bubble-deep); }
     <h2 id="stats-h" class="eyebrow" style="margin-bottom:.8rem">By the numbers</h2>
     <div class="stats-grid">
       <div class="stat">
-        <span class="stat-n">60.1K</span>
+        <span class="stat-n" data-to="60.1" data-suffix="K">60.1K</span>
         <span class="stat-k">Followers</span>
         <span class="stat-sub">Across all platforms</span>
       </div>
       <div class="stat">
-        <span class="stat-n">1.5M</span>
+        <span class="stat-n" data-to="12.4" data-suffix="M">12.4M</span>
         <span class="stat-k">Views</span>
         <span class="stat-sub">On the top sketch alone</span>
       </div>
       <div class="stat">
-        <span class="stat-n">743.5K</span>
+        <span class="stat-n" data-to="743.5" data-suffix="K">743.5K</span>
         <span class="stat-k">Likes</span>
         <span class="stat-sub">TikTok, all time</span>
       </div>
       <div class="stat">
-        <span class="stat-n">41.5K</span>
+        <span class="stat-n" data-to="41.5" data-suffix="K">41.5K</span>
         <span class="stat-k">Instagram</span>
         <span class="stat-sub">336 posts</span>
       </div>
       <div class="stat">
-        <span class="stat-n">14.9K</span>
+        <span class="stat-n" data-to="14.9" data-suffix="K">14.9K</span>
         <span class="stat-k">TikTok</span>
         <span class="stat-sub">@gracefennell0</span>
       </div>
       <div class="stat">
-        <span class="stat-n">3.72K</span>
+        <span class="stat-n" data-to="3.72" data-suffix="K">3.72K</span>
         <span class="stat-k">YouTube</span>
         <span class="stat-sub">318 videos</span>
       </div>
@@ -1445,27 +1454,43 @@ a.client:hover span { color: var(--bubble-deep); }
      embed public posts.
      ──────────────────────────────────────────────── */
   var REELS = [
-    { type: 'ig', id: 'DZLNGaeBxS8', title: 'Volo', meta: 'Branded sketch' },
-    { type: 'ig', id: 'DVenXB2uEM-', title: 'Fit360 DC', meta: 'Branded sketch' },
-    { type: 'ig', id: 'DWXKAUhhSPY', title: 'Roda Auto Repair', meta: 'Branded sketch' }
+    { type: 'yt', id: 'Blw7YbHpIis', title: 'Thank god I was here', meta: '12.4M views' },
+    { type: 'yt', id: '8eIok2WSTKw', title: 'What dog?', meta: '27.4K views' },
+    { type: 'yt', id: 'gxQHxPO5IG0', title: 'Girl who can’t remember the word “the”', meta: '8.6K views' },
+    { type: 'yt', id: 'HsqrwZwAWXU', title: 'Carl’s never been a dinner guest before', meta: '6.9K views' },
+    { type: 'yt', id: 'fVFc1OSFo5Q', title: 'Thai tea at the Lizzo concert', meta: '6K views' }
   ];
 
   var rail = document.getElementById('reel-rail');
   var railNav = document.getElementById('reels-nav');
 
+  /* YouTube is the default because it's the only one of the three that
+     reliably renders in a third-party iframe — Instagram's embed shows
+     "this post may have been removed" for perfectly live public posts. */
   function embedSrc(r) {
     if (r.type === 'tt') {
       return 'https://www.tiktok.com/embed/v2/' + encodeURIComponent(r.id);
     }
-    // /p/ works for reels and grid posts alike; /reel/ only for reels.
-    return 'https://www.instagram.com/p/' + encodeURIComponent(r.id) + '/embed/';
+    if (r.type === 'ig') {
+      return 'https://www.instagram.com/p/' + encodeURIComponent(r.id) + '/embed/';
+    }
+    return 'https://www.youtube.com/embed/' + encodeURIComponent(r.id) + '?rel=0';
   }
 
   function postUrl(r) {
     if (r.type === 'tt') {
       return 'https://www.tiktok.com/@gracefennell0/video/' + encodeURIComponent(r.id);
     }
-    return 'https://www.instagram.com/p/' + encodeURIComponent(r.id) + '/';
+    if (r.type === 'ig') {
+      return 'https://www.instagram.com/p/' + encodeURIComponent(r.id) + '/';
+    }
+    return 'https://www.youtube.com/watch?v=' + encodeURIComponent(r.id);
+  }
+
+  function watchLabel(r) {
+    if (r.type === 'tt') { return 'Watch on TikTok'; }
+    if (r.type === 'ig') { return 'Watch on Instagram'; }
+    return 'Watch on YouTube';
   }
 
   function buildReels() {
@@ -1494,8 +1519,7 @@ a.client:hover span { color: var(--bubble-deep); }
         // iframe (third-party storage off), the card still goes somewhere.
         '<a class="reel-cap" href="' + postUrl(r) + '" target="_blank" rel="noopener">' +
         '<b>' + (r.title || 'Watch the sketch') + '</b>' +
-        '<span>' + (r.meta ? r.meta + ' &middot; ' : '') +
-        (r.type === 'tt' ? 'Watch on TikTok' : 'Watch on Instagram') + ' &rarr;</span>' +
+        '<span>' + (r.meta ? r.meta + ' &middot; ' : '') + watchLabel(r) + ' &rarr;</span>' +
         '</a>' +
         '</article>';
     }).join('');
@@ -1583,6 +1607,63 @@ a.client:hover span { color: var(--bubble-deep); }
   }
 
   document.getElementById('yr').textContent = String(new Date().getFullYear());
+
+  /* ─── stats count up when they scroll into view ─── */
+  (function () {
+    var nums = [].slice.call(document.querySelectorAll('.stat-n[data-to]'));
+    if (!nums.length) { return; }
+
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+    // Reserve the final width so the row doesn't reflow while counting.
+    nums.forEach(function (el) { el.style.minWidth = el.getBoundingClientRect().width + 'px'; });
+
+    if (reduce.matches || !('IntersectionObserver' in window)) { return; }
+
+    function run(el) {
+      var target = parseFloat(el.getAttribute('data-to'));
+      var suffix = el.getAttribute('data-suffix') || '';
+      var decimals = (String(target).split('.')[1] || '').length;
+      var final = target.toFixed(decimals) + suffix;
+      var start = null;
+      var done = false;
+      var DUR = 1100;
+
+      function settle() {
+        if (done) { return; }
+        done = true;
+        el.textContent = final;
+      }
+
+      function frame(now) {
+        if (done) { return; }
+        if (start === null) { start = now; }
+        var t = Math.min(1, (now - start) / DUR);
+        var eased = 1 - Math.pow(1 - t, 3);          // ease-out cubic
+        if (t < 1) {
+          el.textContent = (target * eased).toFixed(decimals) + suffix;
+          requestAnimationFrame(frame);
+        } else {
+          settle();
+        }
+      }
+
+      el.textContent = (0).toFixed(decimals) + suffix;
+      requestAnimationFrame(frame);
+      // rAF is throttled in background tabs. A stat frozen at the wrong
+      // number is worse than no animation, so guarantee the real value.
+      setTimeout(settle, DUR + 400);
+    }
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) { return; }
+        io.unobserve(entry.target);
+        run(entry.target);
+      });
+    }, { threshold: 0.5 });
+
+    nums.forEach(function (el) { io.observe(el); });
+  })();
 })();
 </script>
 
