@@ -65,14 +65,42 @@ var NOTIFY_BUSINESS = 'cliffwgreen@gmail.com';
  * approve it, then check your inbox for "Grace and the Gang — mail is working".
  */
 function authorizeAndTest() {
-  MailApp.sendEmail({
-    to: NOTIFY_BUSINESS,
-    subject: 'Grace and the Gang — mail is working',
-    body: 'If you are reading this, the site can email you business inquiries.\n\n' +
-          'Remaining quota today: ' + MailApp.getRemainingDailyQuota()
-  });
-  return 'sent to ' + NOTIFY_BUSINESS;
+  var report = [];
+
+  // Touch every API the script uses, so the consent screen asks for ALL
+  // the scopes in one pass. MailApp alone won't surface the external
+  // request scope that Resend needs, which is how sends kept falling back.
+  try {
+    var quota = MailApp.getRemainingDailyQuota();
+    report.push('MailApp OK — quota ' + quota);
+  } catch (err) {
+    report.push('MailApp FAILED — ' + err);
+  }
+
+  try {
+    UrlFetchApp.fetch('https://api.resend.com/', { muteHttpExceptions: true });
+    report.push('UrlFetchApp OK — external requests allowed');
+  } catch (err) {
+    report.push('UrlFetchApp FAILED — ' + err);
+  }
+
+  var route = 'not attempted';
+  try {
+    route = sendFrom({
+      to: NOTIFY_BUSINESS,
+      subject: 'Grace and the Gang — mail is working',
+      body: 'If you are reading this, the site can email you.\n\n' +
+            report.join('\n') + '\n\nSent via: see subject route below.'
+    });
+    report.push('sent via ' + route);
+  } catch (err) {
+    report.push('send FAILED — ' + err);
+  }
+
+  Logger.log(report.join('\n'));
+  return report.join(' | ');
 }
+
 
 var SHEETS = {
   newsletter: {
@@ -195,6 +223,8 @@ function getSheet(conf) {
 
 function notifyBusiness(data) {
   try {
+    // Guard: running this straight from the editor passes no data.
+    if (!data) { throw new Error('called with no data — run authorizeAndTest() instead'); }
     var lines = [
       'New promotion inquiry from graceandthegang.com',
       '',
@@ -369,6 +399,7 @@ function esc(v) {
  */
 function confirmToSender(data) {
   try {
+    if (!data) { return; }
     if (!looksLikeEmail(data.email)) { return; }
 
     var first = String(data.name || '').trim().split(/\s+/)[0] || 'there';
