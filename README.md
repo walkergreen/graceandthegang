@@ -43,6 +43,12 @@ Setup is in [`apps-script/Code.gs`](apps-script/Code.gs) — paste it into
 the sheet's Apps Script editor, deploy as a web app with access set to
 **Anyone**, then put the `/exec` URL into `ENDPOINT`.
 
+Business inquiries also email `NOTIFY_BUSINESS` on arrival. Sending needs
+an OAuth scope that writing a row doesn't, and neither pasting new code nor
+"Deploy → New version" re-prompts for it — so after any change that touches
+email, run any function once from the editor and approve the consent screen.
+Check it with `<your /exec URL>?diag=1`: you want `"mailScopeGranted": true`.
+
 Until `ENDPOINT` is set, submitting shows an inline note pointing at
 grace@graceandthegang.com. It never opens a mail client.
 

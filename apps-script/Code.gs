@@ -19,6 +19,18 @@
  *  5. Copy the Web app URL. It ends in /exec.
  *  6. Paste it into ENDPOINT near the bottom of index.html.
  *
+ * ── IMPORTANT: re-authorising after a code change ──────────────────
+ * Sending email needs an OAuth scope that saving a row does not. Adding
+ * MailApp to an already-authorised script does NOT re-prompt you, and
+ * "Deploy → New version" does not either — the script keeps running under
+ * the old grant and every send fails silently.
+ *
+ * After pasting this file: pick any function in the editor's dropdown,
+ * press Run once, and approve the consent screen. Then redeploy.
+ *
+ * To check it worked, open <your /exec URL>?diag=1 in a browser. You want
+ * "mailScopeGranted": true and a "remainingDailyQuota" number.
+ *
  * To change what gets collected later, just edit the headers below.
  */
 
@@ -80,8 +92,46 @@ function doPost(e) {
   }
 }
 
-function doGet() {
-  return respond({ ok: true, note: 'Grace and the Gang form receiver is live.' });
+/**
+ * GET /exec            → liveness check
+ * GET /exec?diag=1     → tells you whether email will actually work.
+ *
+ * Use the diag form when inquiries are saving but not arriving. It reports
+ * whether the mail scope has been granted, how much quota is left, and
+ * whether the deployed code is the version with notifications in it.
+ */
+function doGet(e) {
+  var diag = e && e.parameter && e.parameter.diag;
+  if (!diag) {
+    return respond({ ok: true, note: 'Grace and the Gang form receiver is live.' });
+  }
+
+  var out = {
+    ok: true,
+    hasNotifyFunction: typeof notifyBusiness === 'function',
+    notifyTo: NOTIFY_BUSINESS || '(notifications off)',
+    businessHeaders: SHEETS.business.headers
+  };
+
+  // Reading the quota needs the same scope as sending. If this throws, the
+  // script has not been re-authorised since MailApp was added — which is
+  // exactly why mail silently goes nowhere.
+  try {
+    out.mailScopeGranted = true;
+    out.remainingDailyQuota = MailApp.getRemainingDailyQuota();
+  } catch (err) {
+    out.mailScopeGranted = false;
+    out.mailError = String(err);
+  }
+
+  try {
+    out.lastNotifyError = PropertiesService.getScriptProperties()
+                            .getProperty('lastNotifyError') || '(none)';
+  } catch (err) {
+    out.lastNotifyError = 'unreadable: ' + String(err);
+  }
+
+  return respond(out);
 }
 
 function getSheet(conf) {
@@ -121,9 +171,17 @@ function notifyBusiness(data) {
       replyTo: data.email || undefined,
       name: 'Grace and the Gang site'
     });
+    // Clear any previous failure once a send succeeds.
+    PropertiesService.getScriptProperties().deleteProperty('lastNotifyError');
   } catch (err) {
-    // A failed notification must never lose the row that's already saved.
+    // A failed notification must never lose the row that's already saved —
+    // but it must not vanish either, or you just stop getting email and
+    // never find out why. Recorded for ?diag=1 to surface.
     console.error('notify failed: ' + err);
+    try {
+      PropertiesService.getScriptProperties()
+        .setProperty('lastNotifyError', new Date().toISOString() + ' — ' + String(err));
+    } catch (ignored) {}
   }
 }
 
