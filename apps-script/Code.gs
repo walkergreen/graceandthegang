@@ -40,7 +40,28 @@
  * Add more addresses comma-separated. Set to '' to turn notifications off.
  * Newsletter signups are NOT emailed — they'd be noise.
  */
-var NOTIFY_BUSINESS = 'walker@railscomedy.com, grace@graceandthegang.com';
+var NOTIFY_BUSINESS = 'walker@railscomedy.com';
+
+/**
+ * RUN THIS ONCE from the editor after pasting or changing this file.
+ *
+ * Sending mail needs an OAuth scope that appending a row doesn't. Adding
+ * MailApp to an already-authorised script does not re-prompt, and neither
+ * does "Deploy → New version" — so the web app keeps running under the old
+ * grant and every send fails silently inside notifyBusiness's catch.
+ *
+ * Running this forces the consent screen AND proves the send path works:
+ * approve it, then check your inbox for "Grace and the Gang — mail is working".
+ */
+function authorizeAndTest() {
+  MailApp.sendEmail({
+    to: NOTIFY_BUSINESS,
+    subject: 'Grace and the Gang — mail is working',
+    body: 'If you are reading this, the site can email you business inquiries.\n\n' +
+          'Remaining quota today: ' + MailApp.getRemainingDailyQuota()
+  });
+  return 'sent to ' + NOTIFY_BUSINESS;
+}
 
 var SHEETS = {
   newsletter: {
