@@ -54,33 +54,29 @@ grace@graceandthegang.com. It never opens a mail client.
 
 ### Sending the confirmation from grace@graceandthegang.com
 
-The auto-reply can appear to come from `grace@`, but three things must all
-be true. `MailApp` has no `from` option at all — only `GmailApp` does, and
-only for a **verified alias** on the account that owns the script.
+Porkbun's **free forwarding is not a mailbox**, so the Gmail "Send mail as"
+route cannot work. `fwd1.porkbun.com` is inbound only — port 25 answers,
+587 and 465 refuse the connection — so the SMTP server Gmail auto-suggests
+will never authenticate, and there is no password to enter because there is
+no account.
 
-1. **Verify the alias.** In that Google account: Gmail → Settings →
-   Accounts and Import → *Send mail as* → Add another email address →
-   `grace@graceandthegang.com`, "Treat as an alias". Google emails a code;
-   Porkbun forwarding delivers it. Enter it.
-2. **Authorise the wider scope.** `GmailApp` needs more than `MailApp`, so
-   run any function once from the editor and approve the new consent screen.
-   Run `checkAliases()` — it logs whether the alias is ready.
-3. **Fix SPF, or it lands in spam.** The domain currently publishes
-   `v=spf1 include:_spf.porkbun.com ~all`, which does not authorise Google
-   to send for it. Change the TXT record at the apex to:
+`sendFrom()` therefore tries three routes in order and degrades quietly:
 
-   ```
-   v=spf1 include:_spf.porkbun.com include:_spf.google.com ~all
-   ```
+| | Route | From address | Needs |
+|---|---|---|---|
+| 1 | Resend API | `grace@`, DKIM-signed | free account + DNS records |
+| 2 | Gmail alias | `grace@` | a real mailbox (paid hosting) |
+| 3 | MailApp | script owner, reply-to `grace@` | nothing — works today |
 
-Until the alias is verified, `sendFrom()` falls back to `MailApp` and mail
-still goes out — just from the script owner's address. It degrades rather
-than breaking.
+**To get route 1:** create a free account at resend.com, add the domain
+`graceandthegang.com`, copy the DKIM/SPF records it gives you into Porkbun
+DNS, wait for "Verified", then paste an API key into `RESEND_API_KEY`.
 
-**Also delete the wildcard DNS record.** `*.graceandthegang.com` →
-`uixie.porkbun.com` makes `_dmarc` and `google._domainkey` resolve to
-Porkbun's parking host, so DKIM and DMARC lookups return junk instead of
-"not configured". It serves no purpose now that `www` has its own CNAME.
+**Delete the wildcard DNS record first.** `*.graceandthegang.com` →
+`uixie.porkbun.com` makes every unset subdomain look configured, so DKIM
+lookups like `resend._domainkey` and `_dmarc` return Porkbun's parking host
+instead of a clean "not configured". `www` has its own CNAME, so nothing
+depends on the wildcard.
 
 ### Why the reels are YouTube
 

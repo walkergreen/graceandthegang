@@ -239,11 +239,60 @@ var REPLY_TO = 'grace@graceandthegang.com';
 var SENDER_NAME = 'Grace and the Gang';
 
 /**
- * Send as SEND_AS when that alias is verified, otherwise fall back to the
- * script owner's own address. MailApp has no "from" option at all — only
- * GmailApp does, and only for verified aliases.
+ * A transactional email provider. This is the route that genuinely sends
+ * FROM grace@graceandthegang.com with the domain's own DKIM signature.
+ *
+ * Porkbun's free forwarding cannot do this: fwd1.porkbun.com is inbound
+ * only — ports 587 and 465 refuse connections, only 25 answers — so the
+ * SMTP server Gmail auto-suggests will never authenticate. Forwarding is
+ * not a mailbox, which is also why there's no password to enter.
+ *
+ * Setup:
+ *   1. resend.com → free account (3,000 emails/month, ample here)
+ *   2. Add domain graceandthegang.com, add the DKIM/SPF records it gives
+ *      you at Porkbun, wait for "Verified"
+ *   3. Create an API key, paste it below
+ *
+ * Leave blank and mail still goes out via the fallbacks below.
+ */
+var RESEND_API_KEY = '';
+
+function sendViaResend(options) {
+  var payload = {
+    from: SENDER_NAME + ' <' + SEND_AS + '>',
+    to: [options.to],
+    subject: options.subject,
+    text: options.body
+  };
+  if (options.htmlBody) { payload.html = options.htmlBody; }
+  if (options.replyTo) { payload.reply_to = options.replyTo; }
+
+  var res = UrlFetchApp.fetch('https://api.resend.com/emails', {
+    method: 'post',
+    contentType: 'application/json',
+    headers: { Authorization: 'Bearer ' + RESEND_API_KEY },
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  });
+  var code = res.getResponseCode();
+  if (code < 200 || code >= 300) {
+    throw new Error('resend ' + code + ': ' + res.getContentText().slice(0, 200));
+  }
+  return 'resend';
+}
+
+/**
+ * Best available sender, degrading rather than failing:
+ *   1. Resend      — true from grace@, DKIM-signed by the domain
+ *   2. Gmail alias — from grace@, but needs a verified alias, which needs
+ *                    a real mailbox (paid hosting), not forwarding
+ *   3. MailApp     — from the script owner's address, reply-to grace@
  */
 function sendFrom(options) {
+  if (RESEND_API_KEY) {
+    try { return sendViaResend(options); }
+    catch (err) { console.error('resend failed, falling back: ' + err); }
+  }
   try {
     if (SEND_AS && GmailApp.getAliases().indexOf(SEND_AS) !== -1) {
       var withFrom = {};
