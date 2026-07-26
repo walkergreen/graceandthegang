@@ -22,6 +22,14 @@
  * To change what gets collected later, just edit the headers below.
  */
 
+/**
+ * Business inquiries are also emailed here the moment they arrive, so a
+ * brand asking about a promo doesn't sit unread in a spreadsheet.
+ * Add more addresses comma-separated. Set to '' to turn notifications off.
+ * Newsletter signups are NOT emailed — they'd be noise.
+ */
+var NOTIFY_BUSINESS = 'walker@railscomedy.com, grace@graceandthegang.com';
+
 var SHEETS = {
   newsletter: {
     name: 'Newsletter',
@@ -29,7 +37,7 @@ var SHEETS = {
   },
   business: {
     name: 'Business Inquiries',
-    headers: ['Timestamp', 'Name', 'Company', 'Email', 'Budget', 'Timeline']
+    headers: ['Timestamp', 'Name', 'Company', 'Email', 'Budget', 'Timeline', 'Project']
   }
 };
 
@@ -47,7 +55,7 @@ function doPost(e) {
 
     var row = kind === 'business'
       ? [stamp, data.name || '', data.company || '', data.email || '',
-         data.budget || '', data.timeline || '']
+         data.budget || '', data.timeline || '', data.about || '']
       : [stamp, data.name || '', data.email || '', data.source || 'website'];
 
     // Newsletter only: skip an address that's already on the list.
@@ -61,6 +69,11 @@ function doPost(e) {
     }
 
     sheet.appendRow(row);
+
+    if (kind === 'business' && NOTIFY_BUSINESS) {
+      notifyBusiness(data);
+    }
+
     return respond({ ok: true });
   } catch (err) {
     return respond({ ok: false, error: String(err) });
@@ -83,6 +96,35 @@ function getSheet(conf) {
     sheet.setFrozenRows(1);
   }
   return sheet;
+}
+
+function notifyBusiness(data) {
+  try {
+    var lines = [
+      'New promotion inquiry from graceandthegang.com',
+      '',
+      'Name:     ' + (data.name || '—'),
+      'Company:  ' + (data.company || '—'),
+      'Email:    ' + (data.email || '—'),
+      'Budget:   ' + (data.budget || 'not given'),
+      'Timeline: ' + (data.timeline || 'not given'),
+      '',
+      'Project:',
+      (data.about || '(not described)'),
+      '',
+      'Reply straight to this email to answer them.'
+    ];
+    MailApp.sendEmail({
+      to: NOTIFY_BUSINESS,
+      subject: 'Inquiry: ' + (data.company || 'unknown company'),
+      body: lines.join('\n'),
+      replyTo: data.email || undefined,
+      name: 'Grace and the Gang site'
+    });
+  } catch (err) {
+    // A failed notification must never lose the row that's already saved.
+    console.error('notify failed: ' + err);
+  }
 }
 
 function respond(obj) {

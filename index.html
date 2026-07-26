@@ -12,7 +12,7 @@
 <meta property="og:description" content="Sketch comedy out of Washington, DC. An award-winning group from the creative mind of Grace Fennell.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://www.graceandthegang.com/">
-<meta property="og:image" content="https://www.graceandthegang.com/assets/logo.webp">
+<meta property="og:image" content="https://www.graceandthegang.com/assets/gang-sketchfest-2026.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <style>
 /* ══════════════════════════════════════════════
@@ -645,7 +645,7 @@ a { color: inherit; }
 
 /* ─── headliner room shot ──────────────────────── */
 .hl-room { margin: 0; position: relative; border-radius: 16px; overflow: hidden; }
-.hl-room img { width: 100%; aspect-ratio: 5 / 3; object-fit: cover; object-position: 50% 62%; }
+.hl-room img { width: 100%; aspect-ratio: 5 / 3; object-fit: cover; object-position: 50% 45%; }
 .hl-room figcaption {
   position: absolute; inset: auto 0 0 0;
   padding: 1.4rem .75rem .6rem;
@@ -726,8 +726,8 @@ a { color: inherit; }
 /* ─── business inquiry form ────────────────────── */
 .work-r { background: var(--card-2); border-radius: 18px; padding: clamp(1.1rem, 3vw, 1.5rem); }
 .biz { display: flex; flex-direction: column; gap: .6rem; }
-.biz .field input, .biz .field select {
-  font: var(--f-md)/1.2 var(--body);
+.biz .field input, .biz .field select, .biz .field textarea {
+  font: var(--f-md)/1.35 var(--body);
   padding: .7rem .85rem;
   border-radius: 12px;
   border: 2.5px solid color-mix(in srgb, var(--ink) 18%, transparent);
@@ -735,13 +735,15 @@ a { color: inherit; }
   color: var(--ink);
   width: 100%;
 }
+.biz .field textarea { resize: vertical; min-height: 5.5rem; }
+.biz .field textarea::placeholder { color: var(--ink-soft); }
 .biz .field label {
   font: 700 var(--f-xs)/1 var(--display);
   letter-spacing: .1em;
   text-transform: uppercase;
   color: var(--ink-soft);
 }
-.biz .field input:focus, .biz .field select:focus { border-color: var(--bubble-deep); outline: none; }
+.biz .field input:focus, .biz .field select:focus, .biz .field textarea:focus { border-color: var(--bubble-deep); outline: none; }
 .biz .btn { margin-top: .3rem; }
 .biz-msg { font-size: var(--f-sm); font-weight: 700; min-height: 1.3em; color: var(--ink); }
 .biz-msg[data-state="err"] { color: var(--bubble-deep); }
@@ -926,12 +928,10 @@ a.client:hover span { color: var(--bubble-deep); }
     <div class="hero-vis">
     <h1 class="logo-card">
       <span class="sr-only">Grace and the Gang</span>
-      <!-- Prefers a transparent logo at assets/logo.png. Drop that file in
-           and it's picked up automatically; until then this falls back to
-           the store banner, which has the watercolour art baked in. -->
-      <img class="logo-img" src="assets/logo.png"
-           onerror="this.onerror=null;this.src='assets/logo.webp';this.classList.add('logo-img--art')"
-           alt="" width="1600" height="900" fetchpriority="high">
+      <!-- Transparent wordmark, 1400px wide — plenty for a ~500px slot at 2x.
+           The 2 MB PNG source re-encoded to WebP at 246 KB with alpha intact. -->
+      <img class="logo-img" src="assets/logo.webp"
+           alt="" width="1400" height="835" fetchpriority="high">
     </h1>
     <figure class="hero-portrait">
       <img src="assets/sf26/keep-hero.jpg" alt="A performer on a dark stage with both arms thrown wide, mid-sketch." width="1200" height="800">
@@ -998,10 +998,13 @@ a.client:hover span { color: var(--bubble-deep); }
       </div>
       <div class="hl-side">
         <figure class="hl-room">
-          <img src="assets/gang-sketchfest-2026.jpg" alt="A packed room of people cheering with the cast after a Grace and the Gang show." loading="lazy" width="800" height="1422">
-          <figcaption>What the last one looked like</figcaption>
+          <img src="assets/audience.jpg" alt="A packed theatre audience mid-laugh, rows of people watching the stage." loading="lazy" width="1200" height="799">
+          <figcaption>A full house at DC Sketchfest</figcaption>
         </figure>
-        <div class="countdown" id="countdown" aria-live="polite" aria-label="Time until the show"></div>
+        <!-- No aria-live: this ticks every second and would make a screen
+             reader announce the countdown endlessly. The date is stated in
+             text above, which is the part that actually matters. -->
+        <div class="countdown" id="countdown" aria-hidden="true"></div>
         <a class="btn btn-pink" href="https://www.crowdwork.com/e/grace-and-the-gang-summer-sketch-show-and-after-party" target="_blank" rel="noopener">Grab a ticket</a>
         <p class="hl-price">$20 &middot; $21.94 with fees</p>
       </div>
@@ -1058,15 +1061,15 @@ a.client:hover span { color: var(--bubble-deep); }
         <figcaption>The gang &mdash; DC Sketchfest 2026</figcaption>
       </figure>
       <div class="stage-grid">
-        <figure><img src="assets/sf26/keep-a.jpg" alt="A performer flying across the stage mid-leap, audience visible behind." loading="lazy" width="1200" height="800"><figcaption>2026</figcaption></figure>
-        <figure><img src="assets/sf26/keep-b.jpg" alt="Three performers side by side, faces caught mid-reaction." loading="lazy" width="1200" height="800"><figcaption>2026</figcaption></figure>
+        <figure><img src="assets/sf26/keep-a.jpg" alt="Grace Fennell on stage with both hands raised and her mouth wide open, mid-punchline." loading="lazy" width="1200" height="800"><figcaption>2026</figcaption></figure>
+        <figure><img src="assets/sf26/keep-b.jpg" alt="Grace Fennell leaning into the audience with one arm outstretched, front row visible." loading="lazy" width="1200" height="800"><figcaption>2026</figcaption></figure>
         <figure><img src="assets/sf26/keep-c.jpg" alt="Four performers crowded into a scene, all talking at once." loading="lazy" width="1200" height="800"><figcaption>2026</figcaption></figure>
         <figure><img src="assets/gang-live-sketchfest-2025.jpg" alt="Grace Fennell mid-sketch in a blue tennis dress, four castmates behind her." loading="lazy" width="800" height="533"><figcaption>2025</figcaption></figure>
         <figure><img src="assets/sketchfest24/pick-a.jpg" alt="A performer mid-scream on a dark stage, hands raised beside her head." loading="lazy" width="1600" height="1067"><figcaption>2024</figcaption></figure>
         <figure><img src="assets/sketchfest24/pick-b.jpg" alt="Four performers in firefighter turnout gear striking poses on stage." loading="lazy" width="1600" height="1067"><figcaption>2024</figcaption></figure>
       </div>
     </div>
-    <p class="credit-line">Three years at DC Sketchfest &mdash; photographs by Isaiah Headen and Mikail Faalasli.</p>
+    <p class="credit-line">Three years at DC Sketchfest &mdash; photographs by Mikail Faalasli.</p>
 
     <h3 class="eyebrow" style="margin:2rem 0 .7rem">As seen at</h3>
     <ul class="fests">
@@ -1137,7 +1140,7 @@ a.client:hover span { color: var(--bubble-deep); }
           <li><b>60.1K</b><span>Owned audience, no ad spend</span></li>
           <li><b>1.5M</b><span>Views on a single sketch</span></li>
           <li><b>743.5K</b><span>Likes &mdash; people engage, not just scroll</span></li>
-          <li><b>3&times;</b><span>Brands who came back for another</span></li>
+          <li><b>3</b><span>Brands she&rsquo;s made sketches for</span></li>
         </ul>
 
         <p class="eyebrow" style="margin-top:1.1rem;margin-bottom:.6rem">The work</p>
@@ -1183,6 +1186,11 @@ a.client:hover span { color: var(--bubble-deep); }
               <option>3+ months</option>
               <option>Just exploring</option>
             </select>
+          </div>
+          <div class="field">
+            <label for="bz-about">What are you thinking?</label>
+            <textarea id="bz-about" name="about" rows="4"
+                      placeholder="A sketch about our new location, something for a product launch, a live bit at our event…"></textarea>
           </div>
           <button class="btn btn-pink" type="submit">Send inquiry</button>
           <p class="biz-msg" id="biz-msg" role="status" aria-live="polite"></p>
@@ -1393,6 +1401,7 @@ a.client:hover span { color: var(--bubble-deep); }
       var email = f.elements.email.value.trim();
       var budget = f.elements.budget.value;
       var timeline = f.elements.timeline.value;
+      var about = f.elements.about.value.trim();
 
       if (!name) { say('Mind adding your name?', 'err'); f.elements.name.focus(); return; }
       if (!company) { say('Which company is this for?', 'err'); f.elements.company.focus(); return; }
@@ -1417,7 +1426,8 @@ a.client:hover span { color: var(--bubble-deep); }
         company: company,
         email: email,
         budget: budget,
-        timeline: timeline
+        timeline: timeline,
+        about: about
       }).then(function () {
         f.reset();
         say('Got it — Grace will be in touch.');

@@ -55,4 +55,4 @@ if that ever changes.
 
 ## Photo credit
 
-Live performance photography by **Isaiah Headen** and **Mikail Faalasli**.
+Live performance photography by **Mikail Faalasli**.
