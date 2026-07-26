@@ -2,116 +2,279 @@
 
 Static site for **Grace and the Gang** — sketch comedy out of Washington, DC.
 
-One file, no build step, no dependencies. Open `index.html` or serve the folder.
+Live at **https://www.graceandthegang.com**
+
+Domain registered at **Porkbun**, which also hosts the DNS and forwards
+inbound mail. Hosting is GitHub Pages; outbound mail is Resend; form data
+lands in a Google Sheet.
+
+---
+
+## How it all fits together
+
+```
+                    ┌──────────────────────────────┐
+  git push main ──► │  GitHub Pages                │
+                    │  walkergreen/graceandthegang │
+                    └──────────────┬───────────────┘
+                                   │ served at
+                                   ▼
+                    ┌──────────────────────────────┐
+                    │  www.graceandthegang.com     │  ← domain + DNS: Porkbun
+                    │  index.html (one file)       │  ← GA4 G-QFXVH6RHDS
+                    └──────────────┬───────────────┘
+                                   │ forms POST JSON
+                                   ▼
+                    ┌──────────────────────────────┐
+                    │  Google Apps Script web app  │  ← bound to the sheet
+                    │  /exec                       │
+                    └───────┬──────────────┬───────┘
+                            │              │
+                appends row │              │ sends mail
+                            ▼              ▼
+              ┌───────────────────┐   ┌──────────────────────────┐
+              │ Google Sheet      │   │ Resend API               │
+              │ · Newsletter      │   │ from grace@…  (DKIM)     │
+              │ · Business Inq.   │   │ → inquirer + notify addr │
+              └───────────────────┘   └──────────────────────────┘
+```
+
+There is no build step, no framework, and no server. The whole site is one
+HTML file plus images.
+
+---
+
+## 1. The website
+
+### Files
+
+```
+index.html                 everything — markup, styles, script
+CNAME                      www.graceandthegang.com (tells Pages the domain)
+assets/
+  logo.webp                transparent bubble wordmark (246 KB)
+  favicon.svg
+  audience.jpg             full house — used on the ticket CTA
+  gang-sketchfest-2026.jpg cast poster — also the og:image
+  gang-live-sketchfest-2025.jpg
+  sf26/                    DC Sketchfest 2026 live shots
+  sketchfest24/            DC Sketchfest 2024 live shots
+  *.jpg                    Printify product mockups
+apps-script/
+  Code.gs                  the form receiver (paste into Apps Script)
+  appsscript.json          its OAuth manifest
+```
+
+17 images, 2.4 MB total.
+
+### Running it locally
 
 ```bash
 python3 -m http.server 4325
 ```
 
-## Layout
+### Deploying
 
-```
-index.html            everything — markup, styles, script
-assets/
-  logo.webp           the bubble wordmark
-  gang-sketchfest-2026.jpg
-  gang-live-sketchfest-2025.jpg
-  sketchfest24/       live shots, DC Improv 2024 (photos: Mikail Faalasli)
-  *.jpg               Printify product mockups
+Push to `main`. GitHub Pages rebuilds in roughly a minute. Nothing else.
+
+```bash
+git add -A && git commit -m "..." && git push
 ```
 
-## Things you'll want to edit
+### Things you'll actually want to edit
 
-All of these are near the bottom of `index.html`, in the `<script>`:
+All near the bottom of `index.html`, inside the `<script>`:
 
-| What | Where |
+| What | Constant |
 |---|---|
 | Where both forms send | `ENDPOINT` |
-| Which reels appear | `REELS` array |
+| Which reels appear | `REELS` |
 | The reel shown to managers | `REP_REEL` |
-| Next show date + countdown | `SHOW` |
+| Next show date, drives the countdown | `SHOW` |
 
-### Wiring the forms
+Everything else — calendar rows, festivals, brand work, merch — is plain
+markup in the body.
 
-Both forms post to one Apps Script web app that writes straight into the
-**Grace and the Gang Email Newsletter** spreadsheet — signups to a
-`Newsletter` tab, brand inquiries to a `Business Inquiries` tab. Both tabs
-are created automatically on first submission, and duplicate newsletter
-emails are skipped.
+### After a show passes
 
-Setup is in [`apps-script/Code.gs`](apps-script/Code.gs) — paste it into
-the sheet's Apps Script editor, deploy as a web app with access set to
-**Anyone**, then put the `/exec` URL into `ENDPOINT`.
-
-Business inquiries also email `NOTIFY_BUSINESS` on arrival. Sending needs
-an OAuth scope that writing a row doesn't, and neither pasting new code nor
-"Deploy → New version" re-prompts for it — so after any change that touches
-email, run any function once from the editor and approve the consent screen.
-Check it with `<your /exec URL>?diag=1`: you want `"mailScopeGranted": true`.
-
-Until `ENDPOINT` is set, submitting shows an inline note pointing at
-grace@graceandthegang.com. It never opens a mail client.
-
-### Sending the confirmation from grace@graceandthegang.com
-
-Porkbun's **free forwarding is not a mailbox**, so the Gmail "Send mail as"
-route cannot work. `fwd1.porkbun.com` is inbound only — port 25 answers,
-587 and 465 refuse the connection — so the SMTP server Gmail auto-suggests
-will never authenticate, and there is no password to enter because there is
-no account.
-
-`sendFrom()` therefore tries three routes in order and degrades quietly:
-
-| | Route | From address | Needs |
-|---|---|---|---|
-| 1 | Resend API | `grace@`, DKIM-signed | free account + DNS records |
-| 2 | Gmail alias | `grace@` | a real mailbox (paid hosting) |
-| 3 | MailApp | script owner, reply-to `grace@` | nothing — works today |
-
-**To get route 1:** create a free account at resend.com, add the domain
-`graceandthegang.com`, copy the DKIM/SPF records it gives you into Porkbun
-DNS, wait for "Verified", then paste an API key into `RESEND_API_KEY`.
-
-**Delete the wildcard DNS record first.** `*.graceandthegang.com` →
-`uixie.porkbun.com` makes every unset subdomain look configured, so DKIM
-lookups like `resend._domainkey` and `_dmarc` return Porkbun's parking host
-instead of a clean "not configured". `www` has its own CNAME, so nothing
-depends on the wildcard.
-
-### If Resend keeps falling back to MailApp
-
-Symptom: `?diag=1` shows `resendConfigured: true` but
-`lastSendRoute: mailapp`, and `lastResendError` says
-
-> You do not have permission to call UrlFetchApp.fetch.
-> Required permissions: .../auth/script.external_request
-
-Running a function does **not** always prompt for the missing scope. If the
-project has an explicit `oauthScopes` list in its manifest, that list
-overrides Apps Script's auto-detection — it requests exactly those scopes
-and nothing else, so a newly added API silently has no permission.
-
-Fix:
-
-1. Apps Script → **Project Settings** (gear) → tick
-   *"Show appsscript.json manifest file in editor"*
-2. Open `appsscript.json` and replace it with
-   [`apps-script/appsscript.json`](apps-script/appsscript.json)
-3. Run `authorizeAndTest` — it should now show a consent screen. Approve it.
-4. Deploy → Manage deployments → pencil → New version
-
-The manifest requests only what this script actually uses: the active
-spreadsheet, sending mail, and external requests. The Gmail-alias fallback
-is disabled (`USE_GMAIL_ALIAS = false`) precisely so the invasive
-`gmail.*` scopes are never requested.
+`SHOW` drives this automatically. Once the date is more than four hours
+past, the page stops selling it: the badge flips to "This show has passed",
+the ticket button becomes "See what's next" pointing at the newsletter, and
+the calendar row greys out to "Played". Update `SHOW` and the calendar when
+the next date is booked.
 
 ### Why the reels are YouTube
 
 Instagram's embed renders "this post may have been removed" for perfectly
-live public posts in third-party iframes. YouTube embeds render reliably,
-so `REELS` uses `type: 'yt'`. The loader still supports `'ig'` and `'tt'`
-if that ever changes.
+live public posts inside third-party iframes. YouTube embeds render
+reliably, so `REELS` uses `type: 'yt'`. The loader still supports `'ig'`
+and `'tt'` if that ever changes.
 
-## Photo credit
+The cards are click-to-load facades — a thumbnail plus a play button, with
+the real player swapped in on click. Six embedded players would pull
+megabytes of YouTube JS before anyone pressed play. Thumbnails use
+`oardefault.jpg`, the original-aspect still (1080×1920 for a Short), which
+fills the 9:16 card without cropping.
+
+### Analytics
+
+GA4 property **G-QFXVH6RHDS**, verified sending page views. Custom events:
+
+`ticket_click` · `newsletter_signup` · `business_inquiry` ·
+`merch_click` · `patreon_click` · `reel_play`
+
+`business_inquiry` carries the budget and timeline as parameters. To treat
+any of these as conversions, mark them as **Key events** in GA4 Admin.
+
+---
+
+## 2. DNS — managed at Porkbun
+
+Everything DNS happens in **Porkbun → Domain Management →
+graceandthegang.com → DNS**. Porkbun is the registrar *and* the
+nameserver (`curitiba/fortaleza/maceio/salvador.ns.porkbun.com`), so there
+is no separate DNS provider to check.
+
+Records currently set there:
+
+| Type | Host | Value | Why |
+|---|---|---|---|
+| A ×4 | apex | `185.199.108–111.153` | GitHub Pages |
+| AAAA ×4 | apex | `2606:50c0:800{0..3}::153` | GitHub Pages, IPv6 |
+| CNAME | `www` | `walkergreen.github.io` | the canonical host |
+| MX | apex | `fwd1` / `fwd2.porkbun.com` | inbound mail forwarding |
+| TXT | apex | `v=spf1 include:_spf.porkbun.com ~all` | SPF for forwarding |
+| TXT | `resend._domainkey` | (DKIM key) | lets Resend sign as the domain |
+| TXT | `send` | `v=spf1 include:amazonses.com ~all` | SPF for Resend's sender |
+| MX | `send` | `feedback-smtp.us-east-1.amazonses.com` | Resend bounce handling |
+
+`www` is canonical — the apex 301s to it. HTTPS is enforced; the
+certificate is issued automatically by GitHub.
+
+All of the below are edited in that same Porkbun DNS panel. Porkbun's
+default TTL of 600s is fine; there's no reason to change it.
+
+### Two outstanding DNS items (both in the Porkbun DNS panel)
+
+- **Delete the wildcard** `*.graceandthegang.com` → `uixie.porkbun.com`.
+  It makes every unset subdomain look configured, so `_dmarc` and DKIM
+  lookups return Porkbun's parking host instead of a clean "not
+  configured". `www` has its own record, so nothing depends on it.
+- **No DMARC record.** Once mail is settled, add a TXT at `_dmarc`:
+  `v=DMARC1; p=none; rua=mailto:grace@graceandthegang.com`. `p=none` only
+  reports, so it can't hurt delivery.
+
+---
+
+## 3. Email
+
+### Inbound — Porkbun forwarding
+
+Set up under **Porkbun → Domain Management → Email Forwarding**.
+`grace@graceandthegang.com` is a **forward, not a mailbox**. It relays to
+Grace and to Walker. There is no password and no outbound SMTP:
+`fwd1.porkbun.com` answers on port 25 but refuses 587 and 465, which is why
+Gmail's "Send mail as" flow can never be completed with it.
+
+### Outbound — Resend
+
+`sendFrom()` in `Code.gs` tries three routes and degrades quietly rather
+than dropping mail:
+
+| | Route | From | Requires |
+|---|---|---|---|
+| 1 | **Resend API** | `grace@`, DKIM-signed | API key + verified domain |
+| 2 | Gmail alias | `grace@` | a real mailbox — **disabled** |
+| 3 | MailApp | script owner, reply-to `grace@` | nothing |
+
+Route 2 is off (`USE_GMAIL_ALIAS = false`) on purpose: it needs
+`gmail.readonly` / `gmail.settings.basic`, effectively read access to the
+inbox, and only works with a mailbox that doesn't exist here.
+
+**`RESEND_API_KEY` is deliberately blank in this repo.** The key lives only
+in the Apps Script project. Never commit it.
+
+### What gets sent
+
+Submitting the business form sends two emails:
+
+1. **Notification** → `NOTIFY_BUSINESS`, with reply-to set to the inquirer
+2. **Confirmation** → the inquirer, branded, with a copy of what they sent
+   and reply-to `grace@`
+
+Newsletter signups send nothing — they'd be noise.
+
+---
+
+## 4. Google Sheet + Apps Script
+
+Sheet: **Grace and the Gang Email Newsletter**. Two tabs, both created
+automatically on first submission:
+
+| Tab | Columns |
+|---|---|
+| `Newsletter` | Timestamp, Name, Email, Source |
+| `Business Inquiries` | Timestamp, Name, Company, Email, Budget, Timeline, Project |
+
+Duplicate newsletter addresses are skipped and reported back to the page,
+which says "You're already on the list".
+
+### First-time setup
+
+1. Sheet → **Extensions → Apps Script**
+2. Paste [`apps-script/Code.gs`](apps-script/Code.gs)
+3. **Project Settings** → tick *Show appsscript.json manifest file in
+   editor*, then paste
+   [`apps-script/appsscript.json`](apps-script/appsscript.json)
+4. Run **`authorizeAndTest`** once and approve the consent screen
+5. **Deploy → New deployment → Web app**
+   — Execute as **Me**, Who has access **Anyone**
+6. Copy the `/exec` URL into `ENDPOINT` in `index.html`
+
+### Changing the script later
+
+**Deploy → Manage deployments → pencil → New version.**
+
+Use *Manage deployments*, **not** *New deployment* — editing the existing
+one keeps the same `/exec` URL, so `ENDPOINT` stays valid. A new deployment
+mints a different URL and the site keeps posting to the old one.
+
+Editing and saving alone changes nothing: a versioned web app serves a
+frozen snapshot until you publish a new version.
+
+---
+
+## 5. When something breaks
+
+Open `<your /exec URL>?diag=1`. It reports:
+
+| Field | Meaning |
+|---|---|
+| `mailScopeGranted` | can the script send mail at all |
+| `resendConfigured` | is `RESEND_API_KEY` set |
+| `lastSendRoute` | which of the three routes actually sent, and when |
+| `lastResendError` | why Resend was skipped, if it was |
+| `lastNotifyError` / `lastConfirmError` | last failure per email |
+| `businessHeaders` | proves which code version is deployed |
+
+### The trap that caused most of the trouble
+
+**Adding a new Google API needs a new OAuth scope, and nothing prompts you
+for it.** Not saving, not deploying a new version. The call just throws and
+the `catch` hides it, so mail silently stops.
+
+Worse: if the manifest lists `oauthScopes` explicitly, that list *overrides*
+Apps Script's auto-detection — so a newly used API can never be granted, no
+matter how many times you run or redeploy. That's why
+`apps-script/appsscript.json` exists and lists exactly three scopes: the
+active spreadsheet, sending mail, external requests.
+
+After any change touching a new API: update the manifest, run
+`authorizeAndTest`, approve, then publish a new version.
+
+---
+
+## Credits
 
 Live performance photography by **Mikail Faalasli**.
+Site by [Walker Green](https://instagram.com/guywalks).
