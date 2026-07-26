@@ -114,8 +114,9 @@ function doPost(e) {
 
     sheet.appendRow(row);
 
-    if (kind === 'business' && NOTIFY_BUSINESS) {
-      notifyBusiness(data);
+    if (kind === 'business') {
+      if (NOTIFY_BUSINESS) { notifyBusiness(data); }
+      confirmToSender(data);
     }
 
     return respond({ ok: true });
@@ -213,6 +214,114 @@ function notifyBusiness(data) {
     try {
       PropertiesService.getScriptProperties()
         .setProperty('lastNotifyError', new Date().toISOString() + ' — ' + String(err));
+    } catch (ignored) {}
+  }
+}
+
+/** Where a replying business lands, and how the auto-reply signs itself. */
+var REPLY_TO = 'grace@graceandthegang.com';
+var SENDER_NAME = 'Grace and the Gang';
+
+function looksLikeEmail(v) {
+  return typeof v === 'string' && /^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(v.trim());
+}
+
+function esc(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/**
+ * Auto-reply to whoever submitted the inquiry, so they know it arrived and
+ * have a record of what they sent. Kept in its own try/catch: a bounced
+ * confirmation must not cost you the notification or the saved row.
+ */
+function confirmToSender(data) {
+  try {
+    if (!looksLikeEmail(data.email)) { return; }
+
+    var first = String(data.name || '').trim().split(/\s+/)[0] || 'there';
+    var rows = [
+      ['Company', data.company],
+      ['Budget', data.budget],
+      ['Timeline', data.timeline],
+      ['Project', data.about]
+    ].filter(function (r) { return r[1]; });
+
+    var plain = [
+      'Hi ' + first + ',',
+      '',
+      'Thanks for getting in touch about working with Grace and the Gang.',
+      'Your inquiry landed and Grace will get back to you personally —',
+      'usually within a couple of days.',
+      '',
+      'Here is what you sent:',
+      ''
+    ].concat(rows.map(function (r) {
+      return r[0] + ': ' + r[1];
+    })).concat([
+      '',
+      'If you need to add anything, just reply to this email.',
+      '',
+      '— Grace and the Gang',
+      'graceandthegang.com'
+    ]).join('\n');
+
+    var cells = rows.map(function (r) {
+      return '<tr>' +
+        '<td style="padding:6px 14px 6px 0;vertical-align:top;font:600 13px/1.5 Helvetica,Arial,sans-serif;' +
+        'color:#8A5B84;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap">' + esc(r[0]) + '</td>' +
+        '<td style="padding:6px 0;font:400 15px/1.55 Helvetica,Arial,sans-serif;color:#4A1140">' +
+        esc(r[1]).replace(/\n/g, '<br>') + '</td></tr>';
+    }).join('');
+
+    var html =
+      // MailApp sets the MIME charset, but some clients honour the inline
+      // meta instead — without it the en-dash in "$2,500 – $5,000" can land
+      // as mojibake.
+      '<meta charset="utf-8">' +
+      '<div style="margin:0;padding:28px 16px;background:#FBE6F5">' +
+        '<div style="max-width:520px;margin:0 auto;background:#FFFFFF;border-radius:20px;padding:30px 28px">' +
+          '<p style="margin:0 0 4px;font:700 12px/1 Helvetica,Arial,sans-serif;letter-spacing:.16em;' +
+            'text-transform:uppercase;color:#D2409B">Grace and the Gang</p>' +
+          '<h1 style="margin:0 0 16px;font:700 26px/1.15 Helvetica,Arial,sans-serif;color:#4A1140">' +
+            'Thanks, ' + esc(first) + ' &mdash; got it.</h1>' +
+          '<p style="margin:0 0 18px;font:400 16px/1.6 Helvetica,Arial,sans-serif;color:#4A1140">' +
+            'Your inquiry about working with us came through. Grace will reply personally, ' +
+            'usually within a couple of days.</p>' +
+          (cells
+            ? '<table role="presentation" cellpadding="0" cellspacing="0" border="0" ' +
+              'style="width:100%;border-top:2px solid #F3D6EC;border-bottom:2px solid #F3D6EC;margin:0 0 18px">' +
+              cells + '</table>'
+            : '') +
+          '<p style="margin:0 0 22px;font:400 15px/1.6 Helvetica,Arial,sans-serif;color:#8A5B84">' +
+            'Need to add something? Just reply to this email.</p>' +
+          '<a href="https://www.graceandthegang.com/#reels" ' +
+            'style="display:inline-block;background:#F28FD4;color:#3A0B33;text-decoration:none;' +
+            'font:700 15px/1 Helvetica,Arial,sans-serif;padding:13px 22px;border-radius:999px">' +
+            'See what we make</a>' +
+        '</div>' +
+        '<p style="max-width:520px;margin:14px auto 0;font:400 12px/1.5 Helvetica,Arial,sans-serif;' +
+          'color:#8A5B84;text-align:center">' +
+          'Sketch comedy out of Washington, DC &middot; graceandthegang.com</p>' +
+      '</div>';
+
+    MailApp.sendEmail({
+      to: data.email.trim(),
+      subject: 'Thanks for reaching out to Grace and the Gang',
+      body: plain,
+      htmlBody: html,
+      replyTo: REPLY_TO,
+      name: SENDER_NAME
+    });
+
+    PropertiesService.getScriptProperties().deleteProperty('lastConfirmError');
+  } catch (err) {
+    console.error('confirmation failed: ' + err);
+    try {
+      PropertiesService.getScriptProperties()
+        .setProperty('lastConfirmError', new Date().toISOString() + ' — ' + String(err));
     } catch (ignored) {}
   }
 }
