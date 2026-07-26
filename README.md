@@ -26,26 +26,32 @@ All of these are near the bottom of `index.html`, in the `<script>`:
 
 | What | Where |
 |---|---|
-| Newsletter signups | `LIST` config |
-| Business inquiries | `BIZ` config |
+| Where both forms send | `ENDPOINT` |
 | Which reels appear | `REELS` array |
 | The reel shown to managers | `REP_REEL` |
 | Next show date + countdown | `SHOW` |
 
-### Wiring the two forms
+### Wiring the forms
 
-A Google Sheet can't receive form posts directly, so each form posts to a
-Google Form that feeds a sheet. For each one:
+Both forms post to one Apps Script web app that writes straight into the
+**Grace and the Gang Email Newsletter** spreadsheet — signups to a
+`Newsletter` tab, brand inquiries to a `Business Inquiries` tab. Both tabs
+are created automatically on first submission, and duplicate newsletter
+emails are skipped.
 
-1. In the destination sheet: **Tools → Create a new form**.
-2. Add the questions (newsletter: Name, Email — business: Name, Company,
-   Email, Budget range, Timeline).
-3. Open the live form, View Source, search for `entry.` — you'll find one
-   id per question.
-4. Paste the form's `.../formResponse` URL and the entry ids into the config.
+Setup is in [`apps-script/Code.gs`](apps-script/Code.gs) — paste it into
+the sheet's Apps Script editor, deploy as a web app with access set to
+**Anyone**, then put the `/exec` URL into `ENDPOINT`.
 
-Until a config is filled in, that form falls back to opening a pre-filled
-email so no submission is lost.
+Until `ENDPOINT` is set, submitting shows an inline note pointing at
+grace@graceandthegang.com. It never opens a mail client.
+
+### Why the reels are YouTube
+
+Instagram's embed renders "this post may have been removed" for perfectly
+live public posts in third-party iframes. YouTube embeds render reliably,
+so `REELS` uses `type: 'yt'`. The loader still supports `'ig'` and `'tt'`
+if that ever changes.
 
 ## Photo credit
 

@@ -1294,24 +1294,19 @@ a.client:hover span { color: var(--bubble-deep); }
      Until ACTION is set, the form falls back to opening an
      email to Grace so nobody's signup is silently dropped.
      ──────────────────────────────────────────────── */
-  var LIST = {
-    ACTION: '',                  // https://docs.google.com/forms/d/e/FORM_ID/formResponse
-    NAME_FIELD: '',              // entry.1234567890
-    EMAIL_FIELD: ''              // entry.0987654321
-  };
+  /* ────────────────────────────────────────────────
+     Where both forms send.
 
-  /* Business inquiries — a second Google Form, five questions:
-     Name, Company, Email, Budget range, Timeline. */
-  var BIZ = {
-    ACTION: '',
-    NAME_FIELD: '',
-    COMPANY_FIELD: '',
-    EMAIL_FIELD: '',
-    BUDGET_FIELD: '',
-    TIMELINE_FIELD: ''
-  };
+     One Apps Script web app writes straight into the
+     "Grace and the Gang Email Newsletter" spreadsheet — newsletter
+     signups to a Newsletter tab, brand inquiries to a Business
+     Inquiries tab. Setup is in apps-script/Code.gs (about two minutes).
 
-  var FALLBACK_EMAIL = 'grace@graceandthegang.com';
+     Paste the deployment URL here. It ends in /exec.
+     ──────────────────────────────────────────────── */
+  var ENDPOINT = '';
+
+  var CONTACT_EMAIL = 'grace@graceandthegang.com';
 
   function looksLikeEmail(v) {
     return v && v.indexOf('@') > 0 && v.lastIndexOf('.') > v.indexOf('@');
@@ -1325,39 +1320,20 @@ a.client:hover span { color: var(--bubble-deep); }
     };
   }
 
-  // Google Forms rejects CORS reads, so post blind into a hidden iframe.
-  function postToForm(action, pairs) {
-    var frameName = 'gf_sink';
-    var frame = document.getElementById(frameName);
-    if (!frame) {
-      frame = document.createElement('iframe');
-      frame.id = frameName;
-      frame.name = frameName;
-      frame.style.display = 'none';
-      document.body.appendChild(frame);
-    }
-    var post = document.createElement('form');
-    post.action = action;
-    post.method = 'POST';
-    post.target = frameName;
-    post.style.display = 'none';
-    pairs.forEach(function (kv) {
-      if (!kv[0]) { return; }
-      var i = document.createElement('input');
-      i.type = 'hidden';
-      i.name = kv[0];
-      i.value = kv[1];
-      post.appendChild(i);
+  /* text/plain keeps this a "simple" request, so the browser skips the
+     CORS preflight that Apps Script won't answer. The response is opaque
+     under no-cors — the write still happens, we just can't read the ack. */
+  function send(payload) {
+    return fetch(ENDPOINT, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
     });
-    document.body.appendChild(post);
-    post.submit();
-    document.body.removeChild(post);
   }
 
-  function mailtoFallback(subject, lines) {
-    window.location.href = 'mailto:' + FALLBACK_EMAIL +
-      '?subject=' + encodeURIComponent(subject) +
-      '&body=' + encodeURIComponent(lines.join('\n'));
+  function notWiredYet(say) {
+    say('Signup isn’t connected yet — email ' + CONTACT_EMAIL + ' and Grace will add you.', 'err');
   }
 
   /* ─── newsletter (two places: hero and the newsletter block) ─── */
@@ -1374,18 +1350,25 @@ a.client:hover span { color: var(--bubble-deep); }
         formEl.elements.email.focus();
         return;
       }
-      if (!LIST.ACTION || !LIST.EMAIL_FIELD) {
-        mailtoFallback('Add me to the Grace and the Gang list',
-          ['Name: ' + (name || '(not given)'), 'Email: ' + email]);
-        say('Opening your email app to finish up…');
-        return;
-      }
-      postToForm(LIST.ACTION, [
-        [LIST.NAME_FIELD, name],
-        [LIST.EMAIL_FIELD, email]
-      ]);
-      formEl.reset();
-      say('You’re on the list. See you at the show.');
+      if (!ENDPOINT) { notWiredYet(say); return; }
+
+      var btn = formEl.querySelector('button[type="submit"]');
+      if (btn) { btn.disabled = true; }
+      say('Adding you…');
+
+      send({
+        kind: 'newsletter',
+        name: name,
+        email: email,
+        source: withName ? 'newsletter block' : 'hero'
+      }).then(function () {
+        formEl.reset();
+        say('You’re on the list. See you at the show.');
+      }).catch(function () {
+        say('That didn’t go through — try again, or email ' + CONTACT_EMAIL + '.', 'err');
+      }).then(function () {
+        if (btn) { btn.disabled = false; }
+      });
     });
   }
 
@@ -1414,27 +1397,30 @@ a.client:hover span { color: var(--bubble-deep); }
         return;
       }
 
-      if (!BIZ.ACTION || !BIZ.EMAIL_FIELD) {
-        mailtoFallback('Promotion inquiry — ' + company, [
-          'Name: ' + name,
-          'Company: ' + company,
-          'Email: ' + email,
-          'Budget: ' + (budget || '(not given)'),
-          'Timeline: ' + (timeline || '(not given)')
-        ]);
-        say('Opening your email app to finish up…');
+      if (!ENDPOINT) {
+        say('The form isn’t connected yet — email ' + CONTACT_EMAIL + ' directly.', 'err');
         return;
       }
 
-      postToForm(BIZ.ACTION, [
-        [BIZ.NAME_FIELD, name],
-        [BIZ.COMPANY_FIELD, company],
-        [BIZ.EMAIL_FIELD, email],
-        [BIZ.BUDGET_FIELD, budget],
-        [BIZ.TIMELINE_FIELD, timeline]
-      ]);
-      f.reset();
-      say('Got it — Grace will be in touch.');
+      var btn = f.querySelector('button[type="submit"]');
+      if (btn) { btn.disabled = true; }
+      say('Sending…');
+
+      send({
+        kind: 'business',
+        name: name,
+        company: company,
+        email: email,
+        budget: budget,
+        timeline: timeline
+      }).then(function () {
+        f.reset();
+        say('Got it — Grace will be in touch.');
+      }).catch(function () {
+        say('That didn’t go through — try again, or email ' + CONTACT_EMAIL + '.', 'err');
+      }).then(function () {
+        if (btn) { btn.disabled = false; }
+      });
     });
   })();
 
