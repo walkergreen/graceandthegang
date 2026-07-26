@@ -40,7 +40,18 @@
  * Add more addresses comma-separated. Set to '' to turn notifications off.
  * Newsletter signups are NOT emailed — they'd be noise.
  */
-var NOTIFY_BUSINESS = 'walker@railscomedy.com';
+/**
+ * Changing this address takes effect only after you publish a new version:
+ *   Deploy → Manage deployments → pencil → Version: New version → Deploy
+ *
+ * Use "Manage deployments", NOT "New deployment". Editing the existing
+ * deployment keeps the same /exec URL, so ENDPOINT in index.html stays
+ * valid. "New deployment" mints a different URL and the site's forms would
+ * keep posting to the old one.
+ *
+ * No re-authorisation needed — swapping an address adds no new scope.
+ */
+var NOTIFY_BUSINESS = 'cliffwgreen@gmail.com';
 
 /**
  * RUN THIS ONCE from the editor after pasting or changing this file.
