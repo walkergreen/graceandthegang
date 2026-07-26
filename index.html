@@ -14,6 +14,15 @@
 <meta property="og:url" content="https://www.graceandthegang.com/">
 <meta property="og:image" content="https://www.graceandthegang.com/assets/gang-sketchfest-2026.jpg">
 <meta name="twitter:card" content="summary_large_image">
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-QFXVH6RHDS"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-QFXVH6RHDS');
+</script>
 <style>
 /* ══════════════════════════════════════════════
    GRACE AND THE GANG
@@ -402,6 +411,7 @@ a { color: inherit; }
   padding: .45rem .8rem;
   border-radius: 999px;
 }
+.hl-badge--past { background: var(--card-2); color: var(--ink-soft); }
 .hl-main h3 { font-size: clamp(1.4rem, 3.6vw, 2.1rem); max-width: 20ch; }
 .hl-meta { display: flex; flex-wrap: wrap; gap: .35rem 1.1rem; font-size: var(--f-sm); font-weight: 600; }
 .hl-meta span { display: inline-flex; align-items: center; gap: .4rem; }
@@ -568,6 +578,40 @@ a { color: inherit; }
 }
 .reel-frame { position: relative; aspect-ratio: 9 / 16; background: var(--card-2); }
 .reel-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+/* click-to-load facade */
+.reel-play { display: block; width: 100%; padding: 0; border: 0; cursor: pointer; overflow: hidden; }
+.reel-play img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform .3s ease;
+}
+.reel-play:hover img { transform: scale(1.04); }
+.reel-btn {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 4.2rem; height: 4.2rem;
+  border-radius: 50%;
+  background: var(--bubble);
+  box-shadow: 0 5px 0 var(--bubble-deep), 0 10px 24px -8px rgba(20,4,30,.7);
+  transition: transform .18s ease;
+}
+.reel-btn::after {
+  content: "";
+  position: absolute;
+  top: 50%; left: 54%;
+  transform: translate(-50%, -50%);
+  border-style: solid;
+  border-width: .72rem 0 .72rem 1.2rem;
+  border-color: transparent transparent transparent #3A0B33;
+}
+.reel-play:hover .reel-btn { transform: translate(-50%, -50%) scale(1.08); }
+@media (prefers-reduced-motion: reduce) {
+  .reel-play:hover img, .reel-play:hover .reel-btn { transform: none; }
+  .reel-btn { transform: translate(-50%, -50%); }
+}
 .reel-cap {
   padding: .75rem .9rem 1rem;
   display: flex;
@@ -987,7 +1031,7 @@ a.client:hover span { color: var(--bubble-deep); }
 
     <div class="headliner">
       <div class="hl-main">
-        <span class="hl-badge">On sale now</span>
+        <span class="hl-badge" id="hl-badge">On sale now</span>
         <h3 class="puff">Summer Sketch Show &amp; After&#8209;Party</h3>
         <div class="hl-meta">
           <span><b>Sat Aug 22, 2026</b></span>
@@ -1005,20 +1049,20 @@ a.client:hover span { color: var(--bubble-deep); }
              reader announce the countdown endlessly. The date is stated in
              text above, which is the part that actually matters. -->
         <div class="countdown" id="countdown" aria-hidden="true"></div>
-        <a class="btn btn-pink" href="https://www.crowdwork.com/e/grace-and-the-gang-summer-sketch-show-and-after-party" target="_blank" rel="noopener">Grab a ticket</a>
-        <p class="hl-price">$20 &middot; $21.94 with fees</p>
+        <a class="btn btn-pink" id="hl-cta" href="https://www.crowdwork.com/e/grace-and-the-gang-summer-sketch-show-and-after-party" target="_blank" rel="noopener">Grab a ticket</a>
+        <p class="hl-price" id="hl-price">$20 &middot; $21.94 with fees</p>
       </div>
     </div>
 
     <h3 class="eyebrow" style="margin:2.25rem 0 .25rem">The calendar</h3>
     <div class="cal">
-      <article class="gig">
+      <article class="gig" id="gig-next">
         <div class="gig-date"><span class="gig-mo">Aug</span><span class="gig-dy">22</span><span class="gig-yr">2026</span></div>
         <div class="gig-body">
           <h3>Summer Sketch Show &amp; After-Party</h3>
           <p>Milkcrate, Washington DC &middot; 7:00 PM &middot; with Anna Huntley</p>
         </div>
-        <div class="gig-act"><a class="btn" href="https://www.crowdwork.com/e/grace-and-the-gang-summer-sketch-show-and-after-party" target="_blank" rel="noopener">Tickets</a></div>
+        <div class="gig-act" id="gig-next-act"><a class="btn" href="https://www.crowdwork.com/e/grace-and-the-gang-summer-sketch-show-and-after-party" target="_blank" rel="noopener">Tickets</a></div>
       </article>
       <article class="gig gig-past">
         <div class="gig-date"><span class="gig-mo">Apr</span><span class="gig-dy">25</span><span class="gig-yr">2026</span></div>
@@ -1063,6 +1107,9 @@ a.client:hover span { color: var(--bubble-deep); }
       <div class="stage-grid">
         <figure><img src="assets/sf26/keep-a.jpg" alt="Grace Fennell on stage with both hands raised and her mouth wide open, mid-punchline." loading="lazy" width="1200" height="800"><figcaption>2026</figcaption></figure>
         <figure><img src="assets/sf26/keep-b.jpg" alt="Grace Fennell leaning into the audience with one arm outstretched, front row visible." loading="lazy" width="1200" height="800"><figcaption>2026</figcaption></figure>
+        <figure><img src="assets/sf26/keep-d.jpg" alt="Three performers crowded knee to knee, hands up mid-argument." loading="lazy" width="1200" height="800"><figcaption>2026</figcaption></figure>
+        <figure><img src="assets/sf26/keep-e.jpg" alt="A chaotic party scene — one performer sprawled over a cardboard box while four others look on." loading="lazy" width="1200" height="800"><figcaption>2026</figcaption></figure>
+        <figure><img src="assets/sf26/keep-f.jpg" alt="Grace Fennell crouched forward mid-bit with two castmates behind her." loading="lazy" width="1200" height="800"><figcaption>2026</figcaption></figure>
         <figure><img src="assets/sf26/keep-c.jpg" alt="Four performers crowded into a scene, all talking at once." loading="lazy" width="1200" height="800"><figcaption>2026</figcaption></figure>
         <figure><img src="assets/gang-live-sketchfest-2025.jpg" alt="Grace Fennell mid-sketch in a blue tennis dress, four castmates behind her." loading="lazy" width="800" height="533"><figcaption>2025</figcaption></figure>
         <figure><img src="assets/sketchfest24/pick-a.jpg" alt="A performer mid-scream on a dark stage, hands raised beside her head." loading="lazy" width="1600" height="1067"><figcaption>2024</figcaption></figure>
@@ -1140,12 +1187,12 @@ a.client:hover span { color: var(--bubble-deep); }
           <li><b>60.1K</b><span>Owned audience, no ad spend</span></li>
           <li><b>1.5M</b><span>Views on a single sketch</span></li>
           <li><b>743.5K</b><span>Likes &mdash; people engage, not just scroll</span></li>
-          <li><b>3</b><span>Brands she&rsquo;s made sketches for</span></li>
+          <li><b>3</b><span>Brands, one of them on repeat</span></li>
         </ul>
 
         <p class="eyebrow" style="margin-top:1.1rem;margin-bottom:.6rem">The work</p>
         <ul class="clients">
-          <li><a class="client" href="https://www.instagram.com/p/DZLNGaeBxS8/" target="_blank" rel="noopener"><b>Volo</b><span>Watch the sketch &rarr;</span></a></li>
+          <li><a class="client" href="https://www.instagram.com/p/DZLNGaeBxS8/" target="_blank" rel="noopener"><b>Volo</b><span>Came back for more &rarr;</span></a></li>
           <li><a class="client" href="https://www.instagram.com/p/DVenXB2uEM-/" target="_blank" rel="noopener"><b>Fit360 DC</b><span>Watch the sketch &rarr;</span></a></li>
           <li><a class="client" href="https://www.instagram.com/reel/DWXKAUhhSPY/" target="_blank" rel="noopener"><b>Roda Auto Repair</b><span>Watch the sketch &rarr;</span></a></li>
         </ul>
@@ -1321,6 +1368,31 @@ a.client:hover span { color: var(--bubble-deep); }
 
   var CONTACT_EMAIL = 'grace@graceandthegang.com';
 
+  /* ─── analytics ───────────────────────────────────
+     Thin wrapper so nothing breaks if gtag is blocked or fails to load —
+     which is common, since ad blockers eat googletagmanager.com. */
+  function track(name, params) {
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', name, params || {});
+    }
+  }
+
+  // The conversions worth measuring: tickets, merch, Patreon, reels.
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[href]');
+    if (!a) { return; }
+    var href = a.getAttribute('href') || '';
+    if (href.indexOf('crowdwork.com') > -1) {
+      track('ticket_click', { placement: a.closest('.headliner') ? 'headliner' : 'other' });
+    } else if (href.indexOf('printify') > -1) {
+      track('merch_click', {});
+    } else if (href.indexOf('patreon.com') > -1) {
+      track('patreon_click', {});
+    } else if (href.indexOf('mailto:') === 0) {
+      track('email_click', { placement: a.closest('#rep') ? 'representation' : 'footer' });
+    }
+  }, true);
+
   function looksLikeEmail(v) {
     return v && v.indexOf('@') > 0 && v.lastIndexOf('.') > v.indexOf('@');
   }
@@ -1334,14 +1406,21 @@ a.client:hover span { color: var(--bubble-deep); }
   }
 
   /* text/plain keeps this a "simple" request, so the browser skips the
-     CORS preflight that Apps Script won't answer. The response is opaque
-     under no-cors — the write still happens, we just can't read the ack. */
+     CORS preflight Apps Script won't answer — but the response IS readable,
+     so a failed write reports a failure instead of a cheerful lie. */
   function send(payload) {
     return fetch(ENDPOINT, {
       method: 'POST',
-      mode: 'no-cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(payload)
+    }).then(function (r) {
+      if (!r.ok) { throw new Error('http ' + r.status); }
+      return r.json();
+    }).then(function (data) {
+      if (!data || data.ok !== true) {
+        throw new Error((data && data.error) || 'rejected');
+      }
+      return data;
     });
   }
 
@@ -1374,9 +1453,12 @@ a.client:hover span { color: var(--bubble-deep); }
         name: name,
         email: email,
         source: withName ? 'newsletter block' : 'hero'
-      }).then(function () {
+      }).then(function (data) {
         formEl.reset();
-        say('You’re on the list. See you at the show.');
+        say(data.duplicate
+          ? 'You’re already on the list — see you at the show.'
+          : 'You’re on the list. See you at the show.');
+        track('newsletter_signup', { form_location: withName ? 'newsletter_block' : 'hero' });
       }).catch(function () {
         say('That didn’t go through — try again, or email ' + CONTACT_EMAIL + '.', 'err');
       }).then(function () {
@@ -1431,6 +1513,7 @@ a.client:hover span { color: var(--bubble-deep); }
       }).then(function () {
         f.reset();
         say('Got it — Grace will be in touch.');
+        track('business_inquiry', { budget: budget || 'unspecified', timeline: timeline || 'unspecified' });
       }).catch(function () {
         say('That didn’t go through — try again, or email ' + CONTACT_EMAIL + '.', 'err');
       }).then(function () {
@@ -1510,12 +1593,28 @@ a.client:hover span { color: var(--bubble-deep); }
 
     rail.innerHTML = REELS.map(function (r) {
       var label = r.title ? r.title : 'Sketch by Grace and the Gang';
+      var safe = label.replace(/"/g, '&quot;');
+      // A facade, not an iframe: six embedded players would pull megabytes
+      // of YouTube JS before anyone pressed play. The real player is swapped
+      // in on click.
+      var thumb = r.type === 'yt'
+        ? 'https://i.ytimg.com/vi/' + encodeURIComponent(r.id) + '/hqdefault.jpg'
+        : '';
       return '<article class="reel">' +
-        '<div class="reel-frame">' +
-        '<iframe src="' + embedSrc(r) + '" title="' + label.replace(/"/g, '&quot;') + '" ' +
-        'loading="lazy" allowfullscreen scrolling="no" ' +
-        'allow="autoplay; clipboard-write; encrypted-media; picture-in-picture"></iframe>' +
-        '</div>' +
+        (thumb
+          ? '<button class="reel-frame reel-play" type="button" data-reel="' + r.id +
+            '" data-type="' + r.type + '" aria-label="Play ' + safe + '">' +
+            // Not lazy: these sit in a horizontal scroller, where the lazy
+            // heuristic never fires for off-screen cards and the facade just
+            // stays blank. ~20 KB each, against megabytes of player JS saved.
+            '<img src="' + thumb + '" alt="" width="480" height="360">' +
+            '<span class="reel-btn" aria-hidden="true"></span>' +
+            '</button>'
+          : '<div class="reel-frame">' +
+            '<iframe src="' + embedSrc(r) + '" title="' + safe + '" ' +
+            'loading="lazy" allowfullscreen scrolling="no" ' +
+            'allow="autoplay; clipboard-write; encrypted-media; picture-in-picture"></iframe>' +
+            '</div>') +
         // Always a real link under the embed: if a browser blocks the
         // iframe (third-party storage off), the card still goes somewhere.
         '<a class="reel-cap" href="' + postUrl(r) + '" target="_blank" rel="noopener">' +
@@ -1527,6 +1626,24 @@ a.client:hover span { color: var(--bubble-deep); }
 
     railNav.hidden = false;
     syncNav();
+
+    rail.addEventListener('click', function (e) {
+      var btn = e.target.closest && e.target.closest('.reel-play');
+      if (!btn) { return; }
+      var id = btn.getAttribute('data-reel');
+      var type = btn.getAttribute('data-type');
+      var frame = document.createElement('div');
+      frame.className = 'reel-frame';
+      var iframe = document.createElement('iframe');
+      iframe.src = embedSrc({ type: type, id: id }) + (type === 'yt' ? '&autoplay=1' : '');
+      iframe.title = btn.getAttribute('aria-label') || 'Sketch';
+      iframe.allow = 'autoplay; clipboard-write; encrypted-media; picture-in-picture';
+      iframe.setAttribute('allowfullscreen', '');
+      iframe.setAttribute('scrolling', 'no');
+      frame.appendChild(iframe);
+      btn.parentNode.replaceChild(frame, btn);
+      track('reel_play', { video_id: id });
+    });
   }
 
   var prev = document.getElementById('reel-prev');
@@ -1576,6 +1693,37 @@ a.client:hover span { color: var(--bubble-deep); }
   var SHOW = new Date('2026-08-22T19:00:00-04:00');
   var cd = document.getElementById('countdown');
 
+  /* Once the doors have closed for good, stop selling it. Otherwise the
+     page keeps saying "On sale now" for a night that already happened. */
+  var passedApplied = false;
+  function markShowPassed() {
+    if (passedApplied) { return; }
+    passedApplied = true;
+
+    var badge = document.getElementById('hl-badge');
+    if (badge) { badge.textContent = 'This show has passed'; badge.classList.add('hl-badge--past'); }
+
+    var cta = document.getElementById('hl-cta');
+    if (cta) {
+      cta.textContent = 'See what’s next';
+      cta.href = '#newsletter';
+      cta.removeAttribute('target');
+      cta.removeAttribute('rel');
+    }
+
+    var price = document.getElementById('hl-price');
+    if (price) { price.textContent = 'Join the list to hear about the next one'; }
+
+    var gig = document.getElementById('gig-next');
+    if (gig) { gig.classList.add('gig-past'); }
+
+    var act = document.getElementById('gig-next-act');
+    if (act) { act.textContent = 'Played'; }
+
+    var head = document.getElementById('shows-h');
+    if (head) { head.textContent = 'The last one on stage'; }
+  }
+
   function pad(n) { return n < 10 ? '0' + n : String(n); }
 
   function renderCountdown() {
@@ -1586,6 +1734,7 @@ a.client:hover span { color: var(--bubble-deep); }
       var over = diff < -4 * 3600 * 1000;
       cd.innerHTML = '<span class="cd-done">' +
         (over ? 'That one’s a wrap.' : 'Happening right now.') + '</span>';
+      if (over) { markShowPassed(); }
       return false;
     }
 
