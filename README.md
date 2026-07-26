@@ -6,7 +6,8 @@ Live at **https://www.graceandthegang.com**
 
 Domain registered at **Porkbun**, which also hosts the DNS and forwards
 inbound mail. Hosting is GitHub Pages; outbound mail is Resend; form data
-lands in a Google Sheet.
+lands in a Google Sheet; ticket sales run on **Crowdwork**; traffic is
+measured in **Google Analytics 4**.
 
 ---
 
@@ -37,6 +38,9 @@ lands in a Google Sheet.
               │ · Newsletter      │   │ from grace@…  (DKIM)     │
               │ · Business Inq.   │   │ → inquirer + notify addr │
               └───────────────────┘   └──────────────────────────┘
+
+  Ticket buttons leave the site entirely → Crowdwork hosts checkout.
+  GA4 records the outbound click as `ticket_click` before the hand-off.
 ```
 
 There is no build step, no framework, and no server. The whole site is one
@@ -95,6 +99,13 @@ All near the bottom of `index.html`, inside the `<script>`:
 Everything else — calendar rows, festivals, brand work, merch — is plain
 markup in the body.
 
+**Putting a new show on sale** touches four things:
+
+1. `SHOW` — the date/time, which drives the countdown and the past-show state
+2. The three Crowdwork links (nav, headliner CTA, calendar row)
+3. The headliner copy — title, venue, support act, price line
+4. A new `.gig` row in the calendar, and demote the old one to `gig-past`
+
 ### After a show passes
 
 `SHOW` drives this automatically. Once the date is more than four hours
@@ -116,15 +127,51 @@ megabytes of YouTube JS before anyone pressed play. Thumbnails use
 `oardefault.jpg`, the original-aspect still (1080×1920 for a Short), which
 fills the 9:16 card without cropping.
 
-### Analytics
+### Google Analytics
 
-GA4 property **G-QFXVH6RHDS**, verified sending page views. Custom events:
+GA4 property **G-QFXVH6RHDS**. The `gtag.js` snippet sits in `<head>`;
+verified live, sending page views to `analytics.google.com/g/collect`.
 
-`ticket_click` · `newsletter_signup` · `business_inquiry` ·
-`merch_click` · `patreon_click` · `reel_play`
+Every meaningful action is also tracked, because a page view alone can't
+tell you whether the site is doing its job:
 
-`business_inquiry` carries the budget and timeline as parameters. To treat
-any of these as conversions, mark them as **Key events** in GA4 Admin.
+| Event | Fires when | Parameters |
+|---|---|---|
+| `ticket_click` | any Crowdwork link is clicked | `placement` (headliner / other) |
+| `newsletter_signup` | a signup is saved | `form_location` (hero / newsletter_block) |
+| `business_inquiry` | an inquiry is saved | `budget`, `timeline` |
+| `merch_click` | a Printify product is opened | — |
+| `patreon_click` | the Patreon CTA is clicked | — |
+| `reel_play` | a reel facade is played | `video_id` |
+
+`track()` is a thin wrapper that no-ops if `gtag` is missing, so an ad
+blocker eating googletagmanager.com can't break a form submission.
+
+**To make these count as conversions:** GA4 → Admin → **Events** → mark
+`ticket_click` and `business_inquiry` as **Key events**.
+
+Two limits worth knowing. `ticket_click` counts the hand-off to Crowdwork,
+**not** a completed purchase — GA can't see checkout, which happens on
+Crowdwork's domain. And the budget/timeline parameters need registering as
+custom dimensions (Admin → Custom definitions) before they show up in
+reports; they're collected either way.
+
+### Ticket sales — Crowdwork
+
+Ticketing is not part of this site. Every ticket button links out to the
+Crowdwork event page, which handles checkout, payment and the guest list:
+
+```
+https://www.crowdwork.com/e/grace-and-the-gang-summer-sketch-show-and-after-party
+```
+
+That URL appears in three places in `index.html` — the nav "Get tickets"
+button, the headliner CTA, and the calendar row for the next show. When a
+new show goes on sale, all three need the new event URL, alongside `SHOW`
+and the calendar entry.
+
+Prices shown on the page (`$20 · $21.94 with fees`) are hard-coded copy and
+do not sync with Crowdwork — update them by hand if they change.
 
 ---
 
