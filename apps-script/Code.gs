@@ -218,9 +218,57 @@ function notifyBusiness(data) {
   }
 }
 
-/** Where a replying business lands, and how the auto-reply signs itself. */
+/**
+ * Where a replying business lands, and how the auto-reply signs itself.
+ *
+ * SEND_AS is the address the confirmation appears to come FROM. It only
+ * works once it is a *verified alias* on the Google account that owns this
+ * script — Gmail → Settings → Accounts and Import → "Send mail as".
+ * Google mails a confirmation code to the address; Porkbun forwarding
+ * delivers it, so you can complete the verification.
+ *
+ * If the alias isn't verified, sendFrom() falls back to MailApp and the
+ * mail still goes out from the script owner's address. It degrades rather
+ * than failing — but check getAliases() below to know which you're getting.
+ *
+ * DNS matters too: for mail from this domain to pass SPF when Google sends
+ * it, graceandthegang.com's SPF must include Google. See README.
+ */
+var SEND_AS = 'grace@graceandthegang.com';
 var REPLY_TO = 'grace@graceandthegang.com';
 var SENDER_NAME = 'Grace and the Gang';
+
+/**
+ * Send as SEND_AS when that alias is verified, otherwise fall back to the
+ * script owner's own address. MailApp has no "from" option at all — only
+ * GmailApp does, and only for verified aliases.
+ */
+function sendFrom(options) {
+  try {
+    if (SEND_AS && GmailApp.getAliases().indexOf(SEND_AS) !== -1) {
+      var withFrom = {};
+      for (var k in options) { if (options.hasOwnProperty(k)) { withFrom[k] = options[k]; } }
+      withFrom.from = SEND_AS;
+      GmailApp.sendEmail(options.to, options.subject, options.body, withFrom);
+      return 'gmail-alias';
+    }
+  } catch (err) {
+    console.error('alias send failed, falling back: ' + err);
+  }
+  MailApp.sendEmail(options);
+  return 'mailapp';
+}
+
+/** Run this to see whether the alias is ready. */
+function checkAliases() {
+  var aliases = GmailApp.getAliases();
+  var ok = aliases.indexOf(SEND_AS) !== -1;
+  Logger.log('Verified aliases: ' + JSON.stringify(aliases));
+  Logger.log(ok
+    ? 'READY — confirmations will send from ' + SEND_AS
+    : 'NOT SET UP — add ' + SEND_AS + ' under Gmail > Settings > Accounts > Send mail as');
+  return { aliases: aliases, sendAsReady: ok };
+}
 
 function looksLikeEmail(v) {
   return typeof v === 'string' && /^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(v.trim());
@@ -307,7 +355,7 @@ function confirmToSender(data) {
           'Sketch comedy out of Washington, DC &middot; graceandthegang.com</p>' +
       '</div>';
 
-    MailApp.sendEmail({
+    sendFrom({
       to: data.email.trim(),
       subject: 'Thanks for reaching out to Grace and the Gang',
       body: plain,

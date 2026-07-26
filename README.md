@@ -52,6 +52,36 @@ Check it with `<your /exec URL>?diag=1`: you want `"mailScopeGranted": true`.
 Until `ENDPOINT` is set, submitting shows an inline note pointing at
 grace@graceandthegang.com. It never opens a mail client.
 
+### Sending the confirmation from grace@graceandthegang.com
+
+The auto-reply can appear to come from `grace@`, but three things must all
+be true. `MailApp` has no `from` option at all — only `GmailApp` does, and
+only for a **verified alias** on the account that owns the script.
+
+1. **Verify the alias.** In that Google account: Gmail → Settings →
+   Accounts and Import → *Send mail as* → Add another email address →
+   `grace@graceandthegang.com`, "Treat as an alias". Google emails a code;
+   Porkbun forwarding delivers it. Enter it.
+2. **Authorise the wider scope.** `GmailApp` needs more than `MailApp`, so
+   run any function once from the editor and approve the new consent screen.
+   Run `checkAliases()` — it logs whether the alias is ready.
+3. **Fix SPF, or it lands in spam.** The domain currently publishes
+   `v=spf1 include:_spf.porkbun.com ~all`, which does not authorise Google
+   to send for it. Change the TXT record at the apex to:
+
+   ```
+   v=spf1 include:_spf.porkbun.com include:_spf.google.com ~all
+   ```
+
+Until the alias is verified, `sendFrom()` falls back to `MailApp` and mail
+still goes out — just from the script owner's address. It degrades rather
+than breaking.
+
+**Also delete the wildcard DNS record.** `*.graceandthegang.com` →
+`uixie.porkbun.com` makes `_dmarc` and `google._domainkey` resolve to
+Porkbun's parking host, so DKIM and DMARC lookups return junk instead of
+"not configured". It serves no purpose now that `www` has its own CNAME.
+
 ### Why the reels are YouTube
 
 Instagram's embed renders "this post may have been removed" for perfectly
