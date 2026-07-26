@@ -157,11 +157,23 @@ function doGet(e) {
     out.mailError = String(err);
   }
 
+  out.resendConfigured = !!RESEND_API_KEY;
+  out.sendAs = SEND_AS;
+
   try {
-    out.lastNotifyError = PropertiesService.getScriptProperties()
-                            .getProperty('lastNotifyError') || '(none)';
+    var sp = PropertiesService.getScriptProperties();
+    out.lastNotifyError = sp.getProperty('lastNotifyError') || '(none)';
+    out.lastConfirmError = sp.getProperty('lastConfirmError') || '(none)';
+    out.lastSendRoute = sp.getProperty('lastSendRoute') || '(nothing sent yet)';
+    out.lastResendError = sp.getProperty('lastResendError') || '(none)';
   } catch (err) {
-    out.lastNotifyError = 'unreadable: ' + String(err);
+    out.propsError = String(err);
+  }
+
+  try {
+    out.gmailAliases = GmailApp.getAliases();
+  } catch (err) {
+    out.gmailAliases = 'unreadable: ' + String(err);
   }
 
   return respond(out);
@@ -197,7 +209,11 @@ function notifyBusiness(data) {
       '',
       'Reply straight to this email to answer them.'
     ];
-    MailApp.sendEmail({
+    // Route through sendFrom so this also comes from grace@ once Resend is
+    // configured. Previously this went straight to MailApp, which is why
+    // the notification kept arriving from the script owner's address even
+    // after the confirmation had been switched over.
+    sendFrom({
       to: NOTIFY_BUSINESS,
       subject: 'Inquiry: ' + (data.company || 'unknown company'),
       body: lines.join('\n'),
@@ -289,9 +305,24 @@ function sendViaResend(options) {
  *   3. MailApp     — from the script owner's address, reply-to grace@
  */
 function sendFrom(options) {
+  var props;
+  try { props = PropertiesService.getScriptProperties(); } catch (e) { props = null; }
+  function note(k, v) { try { if (props) { props.setProperty(k, v); } } catch (e) {} }
+
   if (RESEND_API_KEY) {
-    try { return sendViaResend(options); }
-    catch (err) { console.error('resend failed, falling back: ' + err); }
+    try {
+      var r = sendViaResend(options);
+      note('lastSendRoute', 'resend @ ' + new Date().toISOString());
+      note('lastResendError', '(none)');
+      return r;
+    } catch (err) {
+      // Recorded, not swallowed — otherwise a silent fallback looks
+      // identical to "Resend was never configured".
+      console.error('resend failed, falling back: ' + err);
+      note('lastResendError', new Date().toISOString() + ' — ' + String(err));
+    }
+  } else {
+    note('lastResendError', '(RESEND_API_KEY is empty)');
   }
   try {
     if (SEND_AS && GmailApp.getAliases().indexOf(SEND_AS) !== -1) {
@@ -299,12 +330,14 @@ function sendFrom(options) {
       for (var k in options) { if (options.hasOwnProperty(k)) { withFrom[k] = options[k]; } }
       withFrom.from = SEND_AS;
       GmailApp.sendEmail(options.to, options.subject, options.body, withFrom);
+      note('lastSendRoute', 'gmail-alias @ ' + new Date().toISOString());
       return 'gmail-alias';
     }
   } catch (err) {
     console.error('alias send failed, falling back: ' + err);
   }
   MailApp.sendEmail(options);
+  note('lastSendRoute', 'mailapp @ ' + new Date().toISOString());
   return 'mailapp';
 }
 
