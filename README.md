@@ -78,6 +78,33 @@ lookups like `resend._domainkey` and `_dmarc` return Porkbun's parking host
 instead of a clean "not configured". `www` has its own CNAME, so nothing
 depends on the wildcard.
 
+### If Resend keeps falling back to MailApp
+
+Symptom: `?diag=1` shows `resendConfigured: true` but
+`lastSendRoute: mailapp`, and `lastResendError` says
+
+> You do not have permission to call UrlFetchApp.fetch.
+> Required permissions: .../auth/script.external_request
+
+Running a function does **not** always prompt for the missing scope. If the
+project has an explicit `oauthScopes` list in its manifest, that list
+overrides Apps Script's auto-detection — it requests exactly those scopes
+and nothing else, so a newly added API silently has no permission.
+
+Fix:
+
+1. Apps Script → **Project Settings** (gear) → tick
+   *"Show appsscript.json manifest file in editor"*
+2. Open `appsscript.json` and replace it with
+   [`apps-script/appsscript.json`](apps-script/appsscript.json)
+3. Run `authorizeAndTest` — it should now show a consent screen. Approve it.
+4. Deploy → Manage deployments → pencil → New version
+
+The manifest requests only what this script actually uses: the active
+spreadsheet, sending mail, and external requests. The Gmail-alias fallback
+is disabled (`USE_GMAIL_ALIAS = false`) precisely so the invasive
+`gmail.*` scopes are never requested.
+
 ### Why the reels are YouTube
 
 Instagram's embed renders "this post may have been removed" for perfectly

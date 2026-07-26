@@ -198,10 +198,14 @@ function doGet(e) {
     out.propsError = String(err);
   }
 
-  try {
-    out.gmailAliases = GmailApp.getAliases();
-  } catch (err) {
-    out.gmailAliases = 'unreadable: ' + String(err);
+  if (USE_GMAIL_ALIAS) {
+    try {
+      out.gmailAliases = GmailApp.getAliases();
+    } catch (err) {
+      out.gmailAliases = 'unreadable: ' + String(err);
+    }
+  } else {
+    out.gmailAliases = '(alias route disabled)';
   }
 
   return respond(out);
@@ -281,6 +285,14 @@ function notifyBusiness(data) {
  * it, graceandthegang.com's SPF must include Google. See README.
  */
 var SEND_AS = 'grace@graceandthegang.com';
+
+/**
+ * The Gmail-alias fallback is off by default. It needs gmail.settings.basic
+ * / gmail.readonly — the scariest scopes on the consent screen — and only
+ * works with a real mailbox, which Porkbun forwarding is not. Resend covers
+ * this properly. Leave false unless you move to Workspace-hosted mail.
+ */
+var USE_GMAIL_ALIAS = false;
 var REPLY_TO = 'grace@graceandthegang.com';
 var SENDER_NAME = 'Grace and the Gang';
 
@@ -355,7 +367,7 @@ function sendFrom(options) {
     note('lastResendError', '(RESEND_API_KEY is empty)');
   }
   try {
-    if (SEND_AS && GmailApp.getAliases().indexOf(SEND_AS) !== -1) {
+    if (USE_GMAIL_ALIAS && SEND_AS && GmailApp.getAliases().indexOf(SEND_AS) !== -1) {
       var withFrom = {};
       for (var k in options) { if (options.hasOwnProperty(k)) { withFrom[k] = options[k]; } }
       withFrom.from = SEND_AS;
