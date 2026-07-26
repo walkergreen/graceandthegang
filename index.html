@@ -314,9 +314,10 @@ a { color: inherit; }
 }
 
 .logo-card { margin: 0; }
-.logo-img {
-  width: 100%;
-  height: auto;
+/* A transparent wordmark sits straight on the page — no card, no shadow.
+   Only the watercolour banner gets framed, via .logo-img--art. */
+.logo-img { width: 100%; height: auto; }
+.logo-img--art {
   border-radius: var(--round);
   box-shadow: 0 8px 0 rgba(120,30,95,.16), 0 28px 44px -22px rgba(90,16,70,.6);
 }
@@ -925,9 +926,11 @@ a.client:hover span { color: var(--bubble-deep); }
     <div class="hero-vis">
     <h1 class="logo-card">
       <span class="sr-only">Grace and the Gang</span>
-      <!-- The real 3D wordmark. Swap assets/logo.webp for a
-           transparent PNG/SVG export and nothing else changes. -->
-      <img class="logo-img" src="assets/logo.webp"
+      <!-- Prefers a transparent logo at assets/logo.png. Drop that file in
+           and it's picked up automatically; until then this falls back to
+           the store banner, which has the watercolour art baked in. -->
+      <img class="logo-img" src="assets/logo.png"
+           onerror="this.onerror=null;this.src='assets/logo.webp';this.classList.add('logo-img--art')"
            alt="" width="1600" height="900" fetchpriority="high">
     </h1>
     <figure class="hero-portrait">
