@@ -1105,7 +1105,6 @@ a.client:hover span { color: var(--bubble-deep); }
         <figcaption>The gang &mdash; DC Sketchfest 2026</figcaption>
       </figure>
       <div class="stage-grid">
-        <figure><img src="assets/sf26/keep-a.jpg" alt="Grace Fennell on stage with both hands raised and her mouth wide open, mid-punchline." loading="lazy" width="1200" height="800"><figcaption>2026</figcaption></figure>
         <figure><img src="assets/sf26/keep-b.jpg" alt="Grace Fennell leaning into the audience with one arm outstretched, front row visible." loading="lazy" width="1200" height="800"><figcaption>2026</figcaption></figure>
         <figure><img src="assets/sf26/keep-d.jpg" alt="Three performers crowded knee to knee, hands up mid-argument." loading="lazy" width="1200" height="800"><figcaption>2026</figcaption></figure>
         <figure><img src="assets/sf26/keep-e.jpg" alt="A chaotic party scene — one performer sprawled over a cardboard box while four others look on." loading="lazy" width="1200" height="800"><figcaption>2026</figcaption></figure>
@@ -1597,17 +1596,24 @@ a.client:hover span { color: var(--bubble-deep); }
       // A facade, not an iframe: six embedded players would pull megabytes
       // of YouTube JS before anyone pressed play. The real player is swapped
       // in on click.
+      // oardefault is the ORIGINAL aspect-ratio still — 1080x1920 for a
+      // Short, so it fills the 9:16 card with no crop and no upscaling.
+      // hqdefault is only 480x360 and looks soft once cropped to vertical.
       var thumb = r.type === 'yt'
+        ? 'https://i.ytimg.com/vi/' + encodeURIComponent(r.id) + '/oardefault.jpg'
+        : '';
+      var thumbFallback = r.type === 'yt'
         ? 'https://i.ytimg.com/vi/' + encodeURIComponent(r.id) + '/hqdefault.jpg'
         : '';
       return '<article class="reel">' +
         (thumb
           ? '<button class="reel-frame reel-play" type="button" data-reel="' + r.id +
             '" data-type="' + r.type + '" aria-label="Play ' + safe + '">' +
-            // Not lazy: these sit in a horizontal scroller, where the lazy
-            // heuristic never fires for off-screen cards and the facade just
-            // stays blank. ~20 KB each, against megabytes of player JS saved.
-            '<img src="' + thumb + '" alt="" width="480" height="360">' +
+            // data-src, not src: native loading="lazy" never fires for cards
+            // parked off-screen inside a horizontal scroller, so the facades
+            // stayed blank. An IntersectionObserver on the rail does it right.
+            '<img data-src="' + thumb + '" data-fallback="' + thumbFallback +
+            '" alt="" width="1080" height="1920">' +
             '<span class="reel-btn" aria-hidden="true"></span>' +
             '</button>'
           : '<div class="reel-frame">' +
@@ -1626,6 +1632,7 @@ a.client:hover span { color: var(--bubble-deep); }
 
     railNav.hidden = false;
     syncNav();
+    loadThumbs();
 
     rail.addEventListener('click', function (e) {
       var btn = e.target.closest && e.target.closest('.reel-play');
@@ -1644,6 +1651,51 @@ a.client:hover span { color: var(--bubble-deep); }
       btn.parentNode.replaceChild(frame, btn);
       track('reel_play', { video_id: id });
     });
+  }
+
+  /* Fetch the vertical stills only once the rail is near the viewport.
+     They're ~220 KB each, so this keeps them off the initial load without
+     relying on the native lazy heuristic, which doesn't fire here. */
+  function loadThumbs() {
+    var imgs = [].slice.call(rail.querySelectorAll('img[data-src]'));
+    if (!imgs.length) { return; }
+
+    function hydrate() {
+      imgs.forEach(function (img) {
+        var src = img.getAttribute('data-src');
+        if (!src) { return; }
+        img.removeAttribute('data-src');
+        img.addEventListener('error', function onErr() {
+          img.removeEventListener('error', onErr);
+          var fb = img.getAttribute('data-fallback');
+          if (fb) { img.src = fb; }
+        });
+        img.src = src;
+      });
+    }
+
+    var done = false;
+    function once() {
+      if (done) { return; }
+      done = true;
+      hydrate();
+    }
+
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        if (entries.some(function (en) { return en.isIntersecting; })) {
+          io.disconnect();
+          once();
+        }
+      }, { rootMargin: '600px 0px' });
+      io.observe(rail);
+    }
+
+    // Backstop. The observer is the fast path, but a facade with no image
+    // is worse than an early fetch, and lazy loading in this rail has
+    // failed quietly before — so guarantee the stills arrive regardless.
+    if (document.readyState === 'complete') { setTimeout(once, 1500); }
+    else { window.addEventListener('load', function () { setTimeout(once, 1500); }); }
   }
 
   var prev = document.getElementById('reel-prev');
