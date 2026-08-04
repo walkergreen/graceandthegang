@@ -1543,17 +1543,17 @@ a.client:hover span { color: var(--bubble-deep); }
      these sketches went around. Sketches posted more than once sum
      their posts: e.g. Clones = 1.4M + 3.7M + 3M + 397.4K ≈ 8.5M. */
   var REELS = [
-    { type: 'yt', id: 'Blw7YbHpIis', title: 'Thank god I was here', meta: '14M views on Instagram' },
-    { type: 'yt', id: 'G04ML2NoQjE', title: 'Clones', meta: '8.5M views on Instagram' },
-    { type: 'yt', id: 'jDnchKtPhFU', title: 'Abigail Williams, Part One', meta: '4.8M views on Instagram' },
-    { type: 'yt', id: 'CQElfRpj05Y', title: 'The time I won basketball', meta: '4.3M views on Instagram' },
-    { type: 'yt', id: 'KG3ojjX1fVw', title: 'When you see his apartment', meta: '3.4M views on Instagram' },
-    { type: 'yt', id: 'v2HfoAMMgw4', title: 'I don’t have prosecco, but I do have prosciutto', meta: '2.9M views on Instagram' },
-    { type: 'yt', id: 'JMKfdCmZBtg', title: 'Abigail Williams, Part Two', meta: '2.8M views on Instagram' },
-    { type: 'yt', id: 'FapRCDCqEa0', title: 'The gynecologist', meta: '2.3M views on Instagram' },
-    { type: 'yt', id: 'Po90oWDv-As', title: 'The dead wife flashback', meta: '1.8M views on Instagram' },
-    { type: 'yt', id: 'GorF5Nrz3yo', title: 'Meet cute', meta: '1.1M views on Instagram' },
-    { type: 'yt', id: 'PiDZvuT6jDY', title: 'Dumb F*ck', meta: '1M views on Instagram' }
+    { type: 'yt', id: 'Blw7YbHpIis', title: 'Thank god I was here', meta: '14M views' },
+    { type: 'yt', id: 'G04ML2NoQjE', title: 'Clones', meta: '8.5M views' },
+    { type: 'yt', id: 'jDnchKtPhFU', title: 'Abigail Williams, Part One', meta: '4.8M views' },
+    { type: 'yt', id: 'CQElfRpj05Y', title: 'The time I won basketball', meta: '4.3M views' },
+    { type: 'yt', id: 'KG3ojjX1fVw', title: 'When you see his apartment', meta: '3.4M views' },
+    { type: 'yt', id: 'v2HfoAMMgw4', title: 'I don’t have prosecco, but I do have prosciutto', meta: '2.9M views' },
+    { type: 'yt', id: 'JMKfdCmZBtg', title: 'Abigail Williams, Part Two', meta: '2.8M views' },
+    { type: 'yt', id: 'FapRCDCqEa0', title: 'The gynecologist', meta: '2.3M views' },
+    { type: 'yt', id: 'Po90oWDv-As', title: 'The dead wife flashback', meta: '1.8M views' },
+    { type: 'yt', id: 'GorF5Nrz3yo', title: 'Meet cute', meta: '1.1M views' },
+    { type: 'yt', id: 'PiDZvuT6jDY', title: 'Dumb F*ck', meta: '1M views' }
   ];
 
   var rail = document.getElementById('reel-rail');
@@ -1572,6 +1572,15 @@ a.client:hover span { color: var(--bubble-deep); }
     return 'https://www.youtube.com/embed/' + encodeURIComponent(r.id) + '?rel=0';
   }
 
+  /* The play button and the caption link are deliberately different
+     destinations: pressing play swaps in the YouTube embed (the only
+     platform whose iframes render reliably), while the caption sends
+     people to Instagram — where the audience actually lives.
+
+     A reel with an `ig` shortcode links straight to that post
+     (instagram.com/reel/CODE). Without one it links to the Reels page,
+     since most of these sketches exist as several IG posts and no single
+     post is "the" one. */
   function postUrl(r) {
     if (r.type === 'tt') {
       return 'https://www.tiktok.com/@gracefennell0/video/' + encodeURIComponent(r.id);
@@ -1579,13 +1588,15 @@ a.client:hover span { color: var(--bubble-deep); }
     if (r.type === 'ig') {
       return 'https://www.instagram.com/p/' + encodeURIComponent(r.id) + '/';
     }
-    return 'https://www.youtube.com/watch?v=' + encodeURIComponent(r.id);
+    if (r.ig) {
+      return 'https://www.instagram.com/reel/' + encodeURIComponent(r.ig) + '/';
+    }
+    return 'https://www.instagram.com/graceandthegang/reels/';
   }
 
   function watchLabel(r) {
     if (r.type === 'tt') { return 'Watch on TikTok'; }
-    if (r.type === 'ig') { return 'Watch on Instagram'; }
-    return 'Watch on YouTube';
+    return 'Watch on Instagram';
   }
 
   function buildReels() {

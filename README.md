@@ -127,6 +127,13 @@ megabytes of YouTube JS before anyone pressed play. Thumbnails use
 `oardefault.jpg`, the original-aspect still (1080×1920 for a Short), which
 fills the 9:16 card without cropping.
 
+The play button and the caption link go different places on purpose: play
+loads the YouTube embed, while the caption's "Watch on Instagram" sends
+people to the account — where the audience actually lives. Give a reel an
+`ig: 'SHORTCODE'` field and its caption deep-links to that specific post
+instead; without one it links to the profile's Reels page. The view counts
+shown are Instagram totals summed across every post of a sketch.
+
 ### Google Analytics
 
 GA4 property **G-QFXVH6RHDS**. The `gtag.js` snippet sits in `<head>`;
