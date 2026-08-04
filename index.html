@@ -994,9 +994,9 @@ a.client:hover span { color: var(--bubble-deep); }
         <span class="stat-sub">Across all platforms</span>
       </div>
       <div class="stat">
-        <span class="stat-n" data-to="12.4" data-suffix="M">12.4M</span>
+        <span class="stat-n" data-to="14" data-suffix="M">14M</span>
         <span class="stat-k">Views</span>
-        <span class="stat-sub">On the top sketch alone</span>
+        <span class="stat-sub">Top sketch on Instagram alone</span>
       </div>
       <div class="stat">
         <span class="stat-n" data-to="743.5" data-suffix="K">743.5K</span>
@@ -1133,7 +1133,7 @@ a.client:hover span { color: var(--bubble-deep); }
     <div class="sec-head">
       <p class="eyebrow">Greatest hits</p>
       <h2 class="puff" id="reels-h">The ones that went around</h2>
-      <p>A rolling pick of the most-watched sketches.</p>
+      <p>The most-watched sketches. View counts are Instagram totals across every post of each one.</p>
     </div>
     <div class="reels-shell">
       <div class="reels" id="reel-rail" role="region" aria-label="Popular reels, scrollable" tabindex="0"></div>
@@ -1538,12 +1538,22 @@ a.client:hover span { color: var(--bubble-deep); }
      Order here is the order on the page. Both platforms only
      embed public posts.
      ──────────────────────────────────────────────── */
+  /* The embeds are YouTube (the only platform whose iframes render
+     reliably), but the view counts are Instagram totals — that's where
+     these sketches went around. Sketches posted more than once sum
+     their posts: e.g. Clones = 1.4M + 3.7M + 3M + 397.4K ≈ 8.5M. */
   var REELS = [
-    { type: 'yt', id: 'Blw7YbHpIis', title: 'Thank god I was here', meta: '12.4M views' },
-    { type: 'yt', id: '8eIok2WSTKw', title: 'What dog?', meta: '27.4K views' },
-    { type: 'yt', id: 'gxQHxPO5IG0', title: 'Girl who can’t remember the word “the”', meta: '8.6K views' },
-    { type: 'yt', id: 'HsqrwZwAWXU', title: 'Carl’s never been a dinner guest before', meta: '6.9K views' },
-    { type: 'yt', id: 'fVFc1OSFo5Q', title: 'Thai tea at the Lizzo concert', meta: '6K views' }
+    { type: 'yt', id: 'Blw7YbHpIis', title: 'Thank god I was here', meta: '14M views on Instagram' },
+    { type: 'yt', id: 'G04ML2NoQjE', title: 'Clones', meta: '8.5M views on Instagram' },
+    { type: 'yt', id: 'jDnchKtPhFU', title: 'Abigail Williams, Part One', meta: '4.8M views on Instagram' },
+    { type: 'yt', id: 'CQElfRpj05Y', title: 'The time I won basketball', meta: '4.3M views on Instagram' },
+    { type: 'yt', id: 'KG3ojjX1fVw', title: 'When you see his apartment', meta: '3.4M views on Instagram' },
+    { type: 'yt', id: 'v2HfoAMMgw4', title: 'I don’t have prosecco, but I do have prosciutto', meta: '2.9M views on Instagram' },
+    { type: 'yt', id: 'JMKfdCmZBtg', title: 'Abigail Williams, Part Two', meta: '2.8M views on Instagram' },
+    { type: 'yt', id: 'FapRCDCqEa0', title: 'The gynecologist', meta: '2.3M views on Instagram' },
+    { type: 'yt', id: 'Po90oWDv-As', title: 'The dead wife flashback', meta: '1.8M views on Instagram' },
+    { type: 'yt', id: 'GorF5Nrz3yo', title: 'Meet cute', meta: '1.1M views on Instagram' },
+    { type: 'yt', id: 'PiDZvuT6jDY', title: 'Dumb F*ck', meta: '1M views on Instagram' }
   ];
 
   var rail = document.getElementById('reel-rail');
