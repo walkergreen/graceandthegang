@@ -93,7 +93,7 @@ All near the bottom of `index.html`, inside the `<script>`:
 |---|---|
 | Where both forms send | `ENDPOINT` |
 | Which reels appear | `REELS` |
-| The reel shown to managers | `REP_REEL` |
+| The reel shown to managers | `REP_REEL` (auto-picks the most-watched if left `null`) |
 | Next show date, drives the countdown | `SHOW` |
 
 Everything else — calendar rows, festivals, brand work, merch — is plain

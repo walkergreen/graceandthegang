@@ -1164,7 +1164,7 @@ a.client:hover span { color: var(--bubble-deep); }
         </div>
       </div>
       <div class="rep-r">
-        <p class="eyebrow" style="margin-bottom:.6rem">Start here</p>
+        <p class="eyebrow" style="margin-bottom:.6rem">Her most-watched</p>
         <div class="rep-frame">
           <iframe id="rep-reel" title="Grace and the Gang sketch" loading="lazy"
                   allowfullscreen scrolling="no"
@@ -1756,7 +1756,21 @@ a.client:hover span { color: var(--bubble-deep); }
   (function () {
     var slot = document.getElementById('rep-reel');
     if (!slot) { return; }
-    var pick = REP_REEL || REELS[0];
+
+    /* The label above this slot says "Her most-watched", so pick by view
+       count rather than array position — otherwise reordering REELS
+       quietly turns that heading into a false claim. */
+    function views(r) {
+      var m = /([\d.]+)\s*([KMB])?/i.exec(r.meta || '');
+      if (!m) { return 0; }
+      var mult = { K: 1e3, M: 1e6, B: 1e9 }[(m[2] || '').toUpperCase()] || 1;
+      return parseFloat(m[1]) * mult;
+    }
+
+    var pick = REP_REEL || REELS.slice().sort(function (a, b) {
+      return views(b) - views(a);
+    })[0];
+
     if (!pick) {
       slot.parentNode.parentNode.removeChild(slot.parentNode);
       return;
