@@ -529,15 +529,16 @@ a { color: inherit; }
 .fests {
   display: flex;
   flex-wrap: wrap;
-  gap: .5rem;
+  align-items: baseline;
+  gap: .35rem .65rem;
 }
-.fest {
-  font: 700 var(--f-sm)/1.2 var(--display);
-  background: var(--card);
-  color: var(--ink);
-  border-radius: 999px;
-  padding: .7rem 1.15rem;
-  box-shadow: 0 4px 0 rgba(120,30,95,.16);
+.fest { font: 700 var(--f-md)/1.5 var(--display); color: var(--on-ground); }
+.fest:not(:last-child)::after {
+  content: "\00B7";
+  margin-left: .65rem;
+  color: var(--on-ground);
+  opacity: .45;
+  font-weight: 400;
 }
 
 /* ─── reels carousel ───────────────────────────── */
@@ -994,14 +995,14 @@ a.client:hover span { color: var(--bubble-deep); }
         <span class="stat-sub">On the top sketch alone</span>
       </div>
       <div class="stat">
-        <span class="stat-n" data-to="743.5" data-suffix="K">743.5K</span>
+        <span class="stat-n" data-to="746.4" data-suffix="K">746.4K</span>
         <span class="stat-k">Likes</span>
         <span class="stat-sub">TikTok, all time</span>
       </div>
       <div class="stat">
         <span class="stat-n" data-to="43" data-suffix="K">43K</span>
         <span class="stat-k">Instagram</span>
-        <span class="stat-sub">336 posts</span>
+        <span class="stat-sub">347 posts</span>
       </div>
       <div class="stat">
         <span class="stat-n" data-to="14.9" data-suffix="K">14.9K</span>
@@ -1009,9 +1010,9 @@ a.client:hover span { color: var(--bubble-deep); }
         <span class="stat-sub">@gracefennell0</span>
       </div>
       <div class="stat">
-        <span class="stat-n" data-to="3.72" data-suffix="K">3.72K</span>
+        <span class="stat-n" data-to="4.12" data-suffix="K">4.12K</span>
         <span class="stat-k">YouTube</span>
-        <span class="stat-sub">318 videos</span>
+        <span class="stat-sub">324 videos</span>
       </div>
     </div>
     <p class="stats-note">Followers counted across Instagram, TikTok and YouTube. Figures current as of August 2026.</p>
@@ -1181,7 +1182,7 @@ a.client:hover span { color: var(--bubble-deep); }
         <ul class="sponsor-stats">
           <li><b>60.1K</b><span>Owned audience, no ad spend</span></li>
           <li><b>1.5M</b><span>Views on a single sketch</span></li>
-          <li><b>743.5K</b><span>Likes &mdash; people engage, not just scroll</span></li>
+          <li><b>746.4K</b><span>Likes &mdash; people engage, not just scroll</span></li>
           <li><b>5</b><span>Brands have hired her</span></li>
         </ul>
 
@@ -1319,9 +1320,9 @@ a.client:hover span { color: var(--bubble-deep); }
 
 <footer class="wrap foot">
   <div class="socials">
-    <a class="soc" href="https://www.instagram.com/graceandthegang/" target="_blank" rel="noopener"><b>Instagram</b><span>@graceandthegang &middot; 41.5K</span></a>
+    <a class="soc" href="https://www.instagram.com/graceandthegang/" target="_blank" rel="noopener"><b>Instagram</b><span>@graceandthegang &middot; 43K</span></a>
     <a class="soc" href="https://www.tiktok.com/@gracefennell0" target="_blank" rel="noopener"><b>TikTok</b><span>@gracefennell0 &middot; 14.9K</span></a>
-    <a class="soc" href="https://www.youtube.com/@GraceandtheGang" target="_blank" rel="noopener"><b>YouTube</b><span>@GraceandtheGang &middot; 3.72K</span></a>
+    <a class="soc" href="https://www.youtube.com/@GraceandtheGang" target="_blank" rel="noopener"><b>YouTube</b><span>@GraceandtheGang &middot; 4.12K</span></a>
     <a class="soc" href="https://www.patreon.com/graceandthegang" target="_blank" rel="noopener"><b>Patreon</b><span>Bloopers &amp; unseen cuts</span></a>
     <a class="soc" href="https://grace-and-the-gang.printify.me/" target="_blank" rel="noopener"><b>Shop</b><span>Tees, tanks &amp; crops</span></a>
   </div>
