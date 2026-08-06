@@ -132,7 +132,7 @@ loads the YouTube embed, while the caption's "Watch on Instagram" sends
 people to the account — where the audience actually lives. Give a reel an
 `ig: 'SHORTCODE'` field and its caption deep-links to that specific post
 instead; without one it links to the profile's Reels page. The view counts
-shown are Instagram totals summed across every post of a sketch.
+shown are totals across all platforms, summed over every post of a sketch.
 
 ### Google Analytics
 

@@ -539,11 +539,6 @@ a { color: inherit; }
   padding: .7rem 1.15rem;
   box-shadow: 0 4px 0 rgba(120,30,95,.16);
 }
-.fest.is-home {
-  background: var(--mint);
-  color: #0E4F46;
-  box-shadow: 0 4px 0 var(--mint-deep);
-}
 
 /* ─── reels carousel ───────────────────────────── */
 .reels-shell { position: relative; }
@@ -989,14 +984,14 @@ a.client:hover span { color: var(--bubble-deep); }
     <h2 id="stats-h" class="eyebrow" style="margin-bottom:.8rem">By the numbers</h2>
     <div class="stats-grid">
       <div class="stat">
-        <span class="stat-n" data-to="60.1" data-suffix="K">60.1K</span>
+        <span class="stat-n" data-to="62" data-suffix="K">62K</span>
         <span class="stat-k">Followers</span>
         <span class="stat-sub">Across all platforms</span>
       </div>
       <div class="stat">
         <span class="stat-n" data-to="14" data-suffix="M">14M</span>
         <span class="stat-k">Views</span>
-        <span class="stat-sub">Top sketch on Instagram alone</span>
+        <span class="stat-sub">On the top sketch alone</span>
       </div>
       <div class="stat">
         <span class="stat-n" data-to="743.5" data-suffix="K">743.5K</span>
@@ -1004,7 +999,7 @@ a.client:hover span { color: var(--bubble-deep); }
         <span class="stat-sub">TikTok, all time</span>
       </div>
       <div class="stat">
-        <span class="stat-n" data-to="41.5" data-suffix="K">41.5K</span>
+        <span class="stat-n" data-to="43" data-suffix="K">43K</span>
         <span class="stat-k">Instagram</span>
         <span class="stat-sub">336 posts</span>
       </div>
@@ -1019,7 +1014,7 @@ a.client:hover span { color: var(--bubble-deep); }
         <span class="stat-sub">318 videos</span>
       </div>
     </div>
-    <p class="stats-note">Followers counted across Instagram, TikTok and YouTube. Figures current as of July 2026.</p>
+    <p class="stats-note">Followers counted across Instagram, TikTok and YouTube. Figures current as of August 2026.</p>
   </section>
 
   <!-- ═══ SHOWS ═══ -->
@@ -1119,7 +1114,7 @@ a.client:hover span { color: var(--bubble-deep); }
 
     <h3 class="eyebrow" style="margin:2rem 0 .7rem">As seen at</h3>
     <ul class="fests">
-      <li class="fest is-home">DC Sketchfest</li>
+      <li class="fest">DC Sketchfest</li>
       <li class="fest">Sketchfest Chicago</li>
       <li class="fest">iO Fest</li>
       <li class="fest">Sketchfest Seattle</li>
@@ -1133,7 +1128,7 @@ a.client:hover span { color: var(--bubble-deep); }
     <div class="sec-head">
       <p class="eyebrow">Greatest hits</p>
       <h2 class="puff" id="reels-h">The ones that went around</h2>
-      <p>The most-watched sketches. View counts are Instagram totals across every post of each one.</p>
+      <p>The most-watched sketches. View counts are totals across all platforms.</p>
     </div>
     <div class="reels-shell">
       <div class="reels" id="reel-rail" role="region" aria-label="Popular reels, scrollable" tabindex="0"></div>
@@ -1153,7 +1148,7 @@ a.client:hover span { color: var(--bubble-deep); }
         <p class="rep-lede">Actor, improviser and writer. Ten&#8209;plus years on stage, a 60,000&#8209;person audience built from scratch, and a body of work she writes, performs, shoots and cuts herself.</p>
         <dl class="cv">
           <div><dt>Training</dt><dd>Four years of improv study and performance in Chicago. B.A. Media Arts &amp; Theatre, University of South Carolina.</dd></div>
-          <div><dt>Founded</dt><dd>The OverReactors (USC, 2011) &middot; Cease and Desist, all&#8209;female improv (Chicago) &middot; Grace and the Gang (DC)</dd></div>
+          <div><dt>Founded</dt><dd>The OverReactors (Columbia, SC) &middot; Cease and Desist, all&#8209;female improv (Chicago) &middot; Grace and the Gang (DC)</dd></div>
           <div><dt>Festivals</dt><dd>DC Sketchfest &middot; Sketchfest Chicago &middot; iO Fest &middot; Sketchfest Seattle &middot; Philly Sketchfest &middot; Montr&eacute;al Sketchfest</dd></div>
           <div><dt>Brand work</dt><dd>Volo &middot; Fit360 DC &middot; Roda Auto Repair &middot; Local&rsquo;d &middot; Bobby McKey&rsquo;s</dd></div>
           <div><dt>Range</dt><dd>Absurdism, clowning, physical comedy, dark humor</dd></div>
@@ -1253,9 +1248,9 @@ a.client:hover span { color: var(--bubble-deep); }
   <section class="wrap sec" id="newsletter" aria-labelledby="news-h">
     <div class="news">
       <div class="news-l">
-        <p class="eyebrow">Newsletter</p>
+        <p class="eyebrow">Sign up</p>
         <h2 class="puff" id="news-h">Know about the show before it sells out.</h2>
-        <p>New sketches, ticket links and the occasional behind&#8209;the&#8209;scenes disaster. No more than you&rsquo;d want.</p>
+        <p>Drop your email and you&rsquo;ll hear when the next show goes on sale. That&rsquo;s the whole deal.</p>
       </div>
       <form class="signup" id="signup" novalidate>
         <div class="field">
@@ -1266,7 +1261,7 @@ a.client:hover span { color: var(--bubble-deep); }
           <label for="su-email">Email</label>
           <input id="su-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
         </div>
-        <button class="btn" type="submit">Subscribe</button>
+        <button class="btn" type="submit">Sign up</button>
         <p class="signup-msg" id="signup-msg" role="status" aria-live="polite"></p>
         <p class="signup-note">No spam, and you can leave whenever you like.</p>
       </form>
@@ -1278,7 +1273,6 @@ a.client:hover span { color: var(--bubble-deep); }
     <div class="sec-head">
       <p class="eyebrow">The merch table</p>
       <h2 class="puff" id="merch-h">Wear the gang</h2>
-      <p>Every piece has the bubble logo on it. That is the entire pitch.</p>
     </div>
     <div class="shop">
       <a class="item" href="https://grace-and-the-gang.printify.me/product/30041899" target="_blank" rel="noopener">
@@ -1547,14 +1541,14 @@ a.client:hover span { color: var(--bubble-deep); }
     { type: 'yt', id: 'Blw7YbHpIis', ig: 'Dan6ScGOfR_', title: 'Thank god I was here', meta: '14M views' },
     { type: 'yt', id: 'G04ML2NoQjE', ig: 'DYsD9LLuYM1', title: 'Clones', meta: '8.5M views' },
     { type: 'yt', id: 'jDnchKtPhFU', ig: 'DZ3M5N-hxYG', title: 'Abigail Williams, Part One', meta: '4.8M views' },
-    { type: 'yt', id: 'CQElfRpj05Y', ig: 'DY2mCRaO_85', title: 'The time I won basketball', meta: '4.3M views' },
-    { type: 'yt', id: 'KG3ojjX1fVw', ig: 'Dadew6-OFRH', title: 'When you see his apartment', meta: '3.4M views' },
-    { type: 'yt', id: 'v2HfoAMMgw4', ig: 'DYiDQXUhPXR', title: 'I don’t have prosecco, but I do have prosciutto', meta: '2.9M views' },
-    { type: 'yt', id: 'JMKfdCmZBtg', ig: 'DIt1z2zunza', title: 'Abigail Williams, Part Two', meta: '2.8M views' },
-    { type: 'yt', id: 'FapRCDCqEa0', ig: 'DH8yHBauCSd', title: 'The gynecologist', meta: '2.3M views' },
+    { type: 'yt', id: 'CQElfRpj05Y', ig: 'DY2mCRaO_85', title: 'The time I won basketball', meta: '4.6M views' },
+    { type: 'yt', id: 'KG3ojjX1fVw', ig: 'Dadew6-OFRH', title: 'When you see his apartment', meta: '4.6M views' },
+    { type: 'yt', id: 'v2HfoAMMgw4', ig: 'DYiDQXUhPXR', title: 'I don’t have prosecco, but I do have prosciutto', meta: '3.3M views' },
+    { type: 'yt', id: 'FapRCDCqEa0', ig: 'DH8yHBauCSd', title: 'Dr. Wonders', meta: '3.2M views' },
+    { type: 'yt', id: 'JMKfdCmZBtg', ig: 'DIt1z2zunza', title: 'Abigail Williams, Part Two', meta: '2.9M views' },
     { type: 'yt', id: 'Po90oWDv-As', ig: 'DVjw-JWlMjJ', title: 'The dead wife flashback', meta: '1.8M views' },
     { type: 'yt', id: 'GorF5Nrz3yo', ig: 'DZDf0h_uy6w', title: 'Meet cute', meta: '1.1M views' },
-    { type: 'yt', id: 'PiDZvuT6jDY', ig: 'DY-UfsxhqIk', title: 'Dumb F*ck', meta: '1M views' }
+    { type: 'yt', id: 'PiDZvuT6jDY', ig: 'DY-UfsxhqIk', title: 'Dumb F*ck', meta: '1.1M views' }
   ];
 
   var rail = document.getElementById('reel-rail');
