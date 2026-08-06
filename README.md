@@ -330,5 +330,5 @@ After any change touching a new API: update the manifest, run
 
 ## Credits
 
-Live performance photography by **Mikail Faalasli**.
+Live performance photography by [Mikail Faalasli](https://www.instagram.com/mfaalasli).
 Site by [Walker Green](https://instagram.com/guywalks).
